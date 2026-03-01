@@ -170,7 +170,14 @@
   .presup-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .presup-row label{flex:1;font-size:14px;color:var(--ink3);}
   .presup-row label.bold{font-weight:700;color:var(--ink2);font-size:15px;}
+  .presup-input-wrap{position:relative;display:inline-block;}
+  .presup-input-wrap span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:13px;pointer-events:none;}
   .presup-input{width:140px;padding:10px 10px 10px 24px;border:1.5px solid var(--line);border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;background:var(--bg);color:var(--ink);outline:none;}
+  .presup-sum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;margin-bottom:14px;margin-top:4px;}
+  .presup-sum-row.ok{background:rgba(107,122,58,.1);border:1.5px solid rgba(107,122,58,.3);}
+  .presup-sum-row.over{background:rgba(193,82,42,.08);border:1.5px solid rgba(193,82,42,.3);}
+  .presup-sum-label{font-size:12px;font-weight:600;color:var(--ink3);}
+  .presup-sum-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
 
 
   /* ALERT BANNER */
@@ -230,7 +237,7 @@
       <div class="clabel">Monto</div>
       <div class="monto-wrap">
         <span class="msign">$</span>
-        <input class="monto-input" id="monto-input" type="number" inputmode="numeric" placeholder="0" oninput="onMontoInput()" autofocus>
+        <input class="monto-input" id="monto-input" type="text" inputmode="numeric" placeholder="0" oninput="onMontoInput(this)" autofocus>
       </div>
     </div>
     <div class="card"><div class="clabel">Descripción (opcional)</div><input class="desc-input" id="desc-input" type="text" placeholder="¿En qué fue?"></div>
@@ -568,11 +575,24 @@ function renderCats(){
 function selCat(n){cat=n;renderCats();checkBtn();}
 function emoji(p,n){return(CATS[p]||[]).find(x=>x.n===n)?.e||'💸';}
 
-function onMontoInput(){
+function onMontoInput(el){
+  // Strip everything except digits
+  const raw=el.value.replace(/\D/g,'');
+  const num=parseInt(raw)||0;
+  // Store raw value in dataset
+  el.dataset.raw=raw;
+  // Format with thousands separator, keep cursor at end
+  el.value=num>0?num.toLocaleString('es-CL'):'';
   checkBtn();
 }
+
+function getMontoVal(){
+  const el=document.getElementById('monto-input');
+  return parseInt(el.dataset.raw||el.value.replace(/\D/g,''))||0;
+}
+
 function checkBtn(){
-  const m=parseInt(document.getElementById('monto-input')?.value)||0;
+  const m=getMontoVal();
   document.getElementById('btn-main').disabled=!(cat&&m>0);
 }
 
@@ -608,7 +628,7 @@ function goScreen(name,btn){
 // AGREGAR
 // ══════════════════════════════════════
 async function agregar(){
-  const m=parseInt(document.getElementById('monto-input').value)||0;
+  const m=getMontoVal();
   const d=document.getElementById('desc-input').value.trim();
   if(!cat) return toast('Elegí una categoría','err');
   if(m<=0) return toast('Ingresá un monto','err');
@@ -628,8 +648,8 @@ async function agregar(){
 
   const cg=cat,cm=m;
   cat=null;
-  document.getElementById('monto-input').value='';
-  document.getElementById('monto-input').className='monto-input';
+  const mi2=document.getElementById('monto-input');
+  mi2.value=''; mi2.dataset.raw=''; mi2.className='monto-input';
   document.getElementById('desc-input').value='';
   renderCats();
   document.getElementById('btn-main').disabled=true;
@@ -902,19 +922,88 @@ function buildPresupForm(){
     const cl=p.toLowerCase();
     const ac=cl==='casa'?'var(--terra)':cl==='lindo'?'var(--sea)':'var(--olive)';
     const pp=presup[p]||PDEF[p];
-    html+=`<div style="margin-bottom:22px">
+    html+=`<div style="margin-bottom:24px">
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${ac};margin-bottom:12px">${p}</div>
-      <div class="presup-row"><label class="bold">General</label>
-        <div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3)">$</span>
-        <input type="number" class="presup-input" id="pp_${p}_general" value="${pp.general}"></div></div>`;
+      <div class="presup-row">
+        <label class="bold">General</label>
+        <div class="presup-input-wrap">
+          <span>$</span>
+          <input type="number" inputmode="numeric" class="presup-input" id="pp_${p}_general" value="${pp.general}"
+            oninput="onPresupInput('${p}')" style="border-color:${ac}">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);text-align:right;margin:-6px 0 10px;padding-right:4px" id="pp_${p}_general_fmt">
+        $${fmt(pp.general)}
+      </div>`;
+
     CATS[p].forEach(c=>{
-      html+=`<div class="presup-row"><label>${c.e} ${c.n}</label>
-        <div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3)">$</span>
-        <input type="number" class="presup-input" id="pp_${p}_${c.n}" value="${pp[c.n]||0}"></div></div>`;
+      html+=`<div class="presup-row">
+        <label>${c.e} ${c.n}</label>
+        <div class="presup-input-wrap">
+          <span>$</span>
+          <input type="number" inputmode="numeric" class="presup-input" id="pp_${p}_${c.n}" value="${pp[c.n]||0}"
+            oninput="onPresupInput('${p}')">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);text-align:right;margin:-6px 0 8px;padding-right:4px" id="pp_${p}_${c.n}_fmt">
+        $${fmt(pp[c.n]||0)}
+      </div>`;
     });
+
+    // Sum row
+    const catSum=CATS[p].reduce((s,c)=>s+(pp[c.n]||0),0);
+    const diff=pp.general-catSum;
+    const isOk=diff>=0;
+    html+=`<div class="presup-sum-row ${isOk?'ok':'over'}" id="pp_${p}_sum">
+      <span class="presup-sum-label">${isOk?'✓ Suma categorías':'⚠️ Suma categorías'}</span>
+      <div style="text-align:right">
+        <div class="presup-sum-val" style="color:${isOk?'var(--olive)':'var(--terra)'}">
+          $${fmt(catSum)} <span style="font-size:14px;font-family:'Jost',sans-serif;font-weight:500"> / $${fmt(pp.general)}</span>
+        </div>
+        <div style="font-size:11px;color:${isOk?'var(--olive)':'var(--terra)'};margin-top:2px">
+          ${isOk?'Quedan $'+fmt(diff)+' sin asignar':'Excede por $'+fmt(Math.abs(diff))}
+        </div>
+      </div>
+    </div>`;
+
     html+='</div>';
   });
   document.getElementById('presup-form').innerHTML=html;
+}
+
+function onPresupInput(p){
+  const pp=presup[p]||PDEF[p];
+  // Update formatted hint for general
+  const gVal=getNum('pp_'+p+'_general');
+  const fmtEl=document.getElementById('pp_'+p+'_general_fmt');
+  if(fmtEl) fmtEl.textContent='$'+fmt(gVal);
+
+  // Update formatted hints for cats
+  let catSum=0;
+  CATS[p].forEach(c=>{
+    const v=getNum('pp_'+p+'_'+c.n);
+    catSum+=v;
+    const el=document.getElementById('pp_'+p+'_'+c.n+'_fmt');
+    if(el) el.textContent='$'+fmt(v);
+  });
+
+  // Update sum row
+  const diff=gVal-catSum;
+  const isOk=diff>=0;
+  const sumEl=document.getElementById('pp_'+p+'_sum');
+  if(sumEl){
+    sumEl.className='presup-sum-row '+(isOk?'ok':'over');
+    sumEl.innerHTML=`
+      <span class="presup-sum-label">${isOk?'✓ Suma categorías':'⚠️ Suma categorías'}</span>
+      <div style="text-align:right">
+        <div class="presup-sum-val" style="color:${isOk?'var(--olive)':'var(--terra)'}">
+          $${fmt(catSum)} <span style="font-size:14px;font-family:'Jost',sans-serif;font-weight:500"> / $${fmt(gVal)}</span>
+        </div>
+        <div style="font-size:11px;color:${isOk?'var(--olive)':'var(--terra)'};margin-top:2px">
+          ${isOk?'Quedan $'+fmt(diff)+' sin asignar':'Excede por $'+fmt(Math.abs(diff))}
+        </div>
+      </div>`;
+  }
 }
 
 function savePresup(){
