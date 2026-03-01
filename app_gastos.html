@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Gastos Familia De la Barra</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terra:  #C1522A;
+    --sand:   #E8DCC8;
+    --olive:  #6B7A3A;
+    --ochre:  #C89030;
+    --clay:   #A85A2A;
+    --sea:    #2A5060;
+    --bg:     #F5F2EC;
+    --white:  #FDFCF9;
+    --ink:    #1C1814;
+    --ink2:   #4A3F35;
+    --ink3:   #9A8878;
+    --line:   #DDD5C4;
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:'Jost',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; }
+
+  /* HEADER */
+  .header { background:var(--white); padding:56px 28px 24px; border-bottom:1.5px solid var(--line); position:relative; overflow:hidden; }
+  .header::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:var(--sand); opacity:.6; }
+  .header::after  { content:''; position:absolute; bottom:-20px; left:-20px; width:90px; height:90px; border-radius:50%; background:var(--terra); opacity:.07; }
+  .header-inner { position:relative; z-index:1; }
+  .eyebrow { font-size:10px; font-weight:500; letter-spacing:2.5px; text-transform:uppercase; color:var(--terra); margin-bottom:6px; }
+  .header h1 { font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:600; line-height:1.05; color:var(--ink); letter-spacing:-.3px; }
+  .header h1 em { font-style:italic; color:var(--terra); }
+  .tagline { margin-top:8px; font-family:'Cormorant Garamond',serif; font-size:15px; font-style:italic; color:var(--ink3); }
+  .month-chip { margin-top:14px; display:inline-flex; align-items:center; gap:6px; background:var(--sand); padding:5px 12px; border-radius:99px; font-size:12px; font-weight:500; color:var(--ink2); }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--olive); display:inline-block; }
+  .dot.off { background:var(--ink3); }
+
+  /* PERSONA TABS */
+  .persona-tabs { display:flex; background:var(--white); border-bottom:1.5px solid var(--line); }
+  .persona-tab { flex:1; padding:14px 8px; border:none; background:transparent; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; color:var(--ink3); cursor:pointer; transition:all .2s; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; letter-spacing:.3px; }
+  .persona-tab .te { font-size:16px; display:block; margin-bottom:3px; }
+  .persona-tab.active { color:var(--ink); }
+  .persona-tab.active.casa  { border-bottom-color:var(--terra); }
+  .persona-tab.active.lindo { border-bottom-color:var(--sea); }
+  .persona-tab.active.linda { border-bottom-color:var(--olive); }
+
+  /* MAIN */
+  .main { padding:20px 20px 40px; }
+
+  /* NAV */
+  .nav-tabs { display:flex; gap:4px; margin-bottom:20px; background:var(--white); border-radius:10px; padding:4px; border:1.5px solid var(--line); }
+  .nav-tab { flex:1; padding:9px 4px; border-radius:7px; border:none; background:transparent; font-family:'Jost',sans-serif; font-size:11px; font-weight:500; color:var(--ink3); cursor:pointer; transition:all .2s; }
+  .nav-tab.active { background:var(--bg); color:var(--ink); font-weight:600; }
+
+  .screen { display:none; }
+  .screen.active { display:block; }
+
+  /* CARD */
+  .card { background:var(--white); border-radius:var(--radius); padding:20px; margin-bottom:14px; border:1.5px solid var(--line); }
+  .clabel { font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--ink3); margin-bottom:14px; }
+
+  /* CATS */
+  .cat-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .cat-grid.cols3 { grid-template-columns:1fr 1fr 1fr; }
+  .cat-btn { background:var(--bg); border:1.5px solid var(--line); border-radius:11px; padding:13px 6px; text-align:center; cursor:pointer; transition:all .18s; font-family:'Jost',sans-serif; }
+  .cat-btn .ce { font-size:20px; display:block; margin-bottom:5px; }
+  .cat-btn .cn { font-size:11px; font-weight:500; color:var(--ink2); line-height:1.2; }
+  .cat-btn:active { transform:scale(.95); }
+  .cat-btn.selected.casa  { background:rgba(193,82,42,.09); border-color:var(--terra); }
+  .cat-btn.selected.casa .cn  { color:var(--terra); font-weight:600; }
+  .cat-btn.selected.lindo { background:rgba(42,80,96,.09); border-color:var(--sea); }
+  .cat-btn.selected.lindo .cn { color:var(--sea); font-weight:600; }
+  .cat-btn.selected.linda { background:rgba(107,122,58,.09); border-color:var(--olive); }
+  .cat-btn.selected.linda .cn { color:var(--olive); font-weight:600; }
+
+  /* MONTO */
+  .monto-wrap { position:relative; }
+  .msign { position:absolute; left:16px; top:50%; transform:translateY(-50%); font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; color:var(--ink3); }
+  .monto-input { width:100%; background:var(--bg); border:1.5px solid var(--line); border-radius:11px; padding:16px 16px 16px 38px; font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:600; color:var(--ink); outline:none; transition:border-color .2s; text-align:right; }
+  .monto-input:focus { border-color:var(--terra); }
+  .monto-input.lindo:focus { border-color:var(--sea); }
+  .monto-input.linda:focus { border-color:var(--olive); }
+
+  /* DESC */
+  .desc-input { width:100%; background:var(--bg); border:1.5px solid var(--line); border-radius:11px; padding:13px 15px; font-family:'Jost',sans-serif; font-size:14px; color:var(--ink); outline:none; transition:border-color .2s; }
+  .desc-input::placeholder { color:var(--ink3); }
+  .desc-input:focus { border-color:var(--terra); }
+
+  /* BUTTONS */
+  .btn-main { width:100%; padding:16px; border-radius:11px; border:none; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--white); cursor:pointer; transition:all .2s; }
+  .btn-main.casa  { background:var(--terra); }
+  .btn-main.lindo { background:var(--sea); }
+  .btn-main.linda { background:var(--olive); }
+  .btn-main:active { opacity:.85; transform:scale(.98); }
+  .btn-main:disabled { opacity:.28; cursor:not-allowed; transform:none; }
+  .btn-sec { width:100%; padding:12px; border-radius:11px; border:1.5px solid var(--line); background:transparent; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; color:var(--ink3); cursor:pointer; transition:all .2s; margin-top:9px; }
+  .btn-sec:hover { border-color:var(--ink3); color:var(--ink2); }
+  .btn-sync { width:100%; padding:14px; border-radius:11px; border:1.5px dashed var(--ochre); background:rgba(200,144,48,.06); font-family:'Jost',sans-serif; font-size:13px; font-weight:600; color:var(--ochre); cursor:pointer; transition:all .2s; margin-top:9px; }
+  .btn-sync:hover { background:rgba(200,144,48,.12); }
+
+  /* HISTORIAL */
+  .gi { display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .gi:last-child { border-bottom:none; }
+  .gi-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .gi-icon.casa  { background:rgba(193,82,42,.1); }
+  .gi-icon.lindo { background:rgba(42,80,96,.1); }
+  .gi-icon.linda { background:rgba(107,122,58,.1); }
+  .gi-info { flex:1; min-width:0; }
+  .gi-cat { font-size:13px; font-weight:600; }
+  .gi-desc { font-size:12px; color:var(--ink3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gi-fecha { font-size:11px; color:var(--ink3); font-family:'Cormorant Garamond',serif; font-style:italic; margin-top:2px; }
+  .gi-right { text-align:right; flex-shrink:0; }
+  .gi-monto { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; }
+  .gi-monto.casa  { color:var(--terra); }
+  .gi-monto.lindo { color:var(--sea); }
+  .gi-monto.linda { color:var(--olive); }
+  .gi-del { background:none; border:none; color:var(--line); font-size:13px; cursor:pointer; padding:4px; display:block; margin-top:2px; transition:color .2s; }
+  .gi-del:hover { color:var(--terra); }
+
+  .empty { text-align:center; padding:50px 20px; color:var(--ink3); }
+  .empty .ee { font-size:44px; margin-bottom:12px; }
+  .empty p { font-family:'Cormorant Garamond',serif; font-size:18px; font-style:italic; }
+
+  /* RESUMEN */
+  .hero { background:var(--white); border-radius:var(--radius); border:1.5px solid var(--line); padding:22px; margin-bottom:14px; position:relative; overflow:hidden; }
+  .hero::after { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; opacity:.06; }
+  .hero.casa::after  { background:var(--terra); }
+  .hero.lindo::after { background:var(--sea); }
+  .hero.linda::after { background:var(--olive); }
+  .hlabel { font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--ink3); }
+  .hamount { font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:600; line-height:1; margin:6px 0 4px; }
+  .hamount.casa  { color:var(--terra); }
+  .hamount.lindo { color:var(--sea); }
+  .hamount.linda { color:var(--olive); }
+  .hsub { font-size:13px; color:var(--ink3); }
+  .hsub span { font-weight:600; color:var(--ink2); }
+  .bar-wrap { margin-top:16px; }
+  .bar-hd { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .bar-bg { height:6px; background:var(--sand); border-radius:99px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:99px; transition:width .6s; }
+  .cat-ri { background:var(--white); border-radius:10px; border:1.5px solid var(--line); padding:14px 16px; margin-bottom:9px; }
+  .cri-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+  .cri-name { font-size:13px; font-weight:500; }
+  .cri-amt { font-size:12px; color:var(--ink3); }
+  .cri-amt strong { color:var(--ink2); font-weight:600; }
+  .sect { font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--ink3); margin:22px 0 11px; }
+
+  /* CONFIG */
+  .cfg-input { width:100%; background:var(--bg); border:1.5px solid var(--line); border-radius:11px; padding:12px 14px; font-family:'Jost',sans-serif; font-size:13px; color:var(--ink); outline:none; transition:border-color .2s; margin-bottom:10px; }
+  .cfg-input:focus { border-color:var(--ochre); }
+  .cfg-input::placeholder { color:var(--ink3); }
+  .info-box { background:rgba(200,144,48,.07); border:1.5px solid rgba(200,144,48,.22); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--ink2); line-height:1.7; margin-bottom:12px; }
+  .info-box strong { color:var(--ochre); }
+  .steps { list-style:none; counter-reset:s; }
+  .steps li { counter-increment:s; padding:8px 0 8px 32px; position:relative; font-size:13px; color:var(--ink2); border-bottom:1px solid var(--line); line-height:1.5; }
+  .steps li:last-child { border-bottom:none; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:9px; width:20px; height:20px; background:var(--terra); color:white; border-radius:50%; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+  .script-box { background:var(--ink); color:#C8D8C0; border-radius:10px; padding:14px; font-family:monospace; font-size:11px; line-height:1.7; overflow-x:auto; white-space:pre; margin:10px 0; max-height:180px; overflow-y:auto; }
+  .btn-copy { width:100%; padding:11px; border-radius:9px; border:1.5px solid var(--line); background:transparent; font-family:'Jost',sans-serif; font-size:12px; font-weight:500; color:var(--ink3); cursor:pointer; transition:all .2s; }
+  .btn-copy:hover { border-color:var(--sea); color:var(--sea); }
+  .presup-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .presup-row label { flex:1; font-size:13px; color:var(--ink3); }
+  .presup-row label.bold { font-weight:600; color:var(--ink2); }
+  .presup-input { width:130px; padding:8px 8px 8px 22px; border:1.5px solid var(--line); border-radius:8px; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; background:var(--bg); color:var(--ink); outline:none; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:var(--white); padding:12px 24px; border-radius:99px; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; z-index:999; transition:transform .3s cubic-bezier(.34,1.4,.64,1); white-space:nowrap; box-shadow:0 6px 24px rgba(0,0,0,.18); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast.ok   { background:var(--olive); }
+  .toast.err  { background:var(--terra); }
+  .toast.warn { background:var(--ochre); color:var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Control mensual</div>
+    <h1>Gastos Familia<br><em>De la Barra</em></h1>
+    <div class="tagline">Si cuidamos la casa, la casa nos cuida</div>
+    <div class="month-chip">
+      <span class="dot off" id="sync-dot"></span>
+      <span id="mes-label"></span>
+      <span id="sync-label" style="color:var(--ink3)">· Sin conexión Drive</span>
+    </div>
+  </div>
+</div>
+
+<div class="persona-tabs">
+  <button class="persona-tab casa active" onclick="setPer('Casa',this)"><span class="te">🏠</span>Casa</button>
+  <button class="persona-tab lindo" onclick="setPer('Lindo',this)"><span class="te">👨</span>Lindo</button>
+  <button class="persona-tab linda" onclick="setPer('Linda',this)"><span class="te">👩</span>Linda</button>
+</div>
+
+<div class="main">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goScreen('nuevo',this)">➕ Nuevo</button>
+    <button class="nav-tab" onclick="goScreen('historial',this)">📋 Historial</button>
+    <button class="nav-tab" onclick="goScreen('resumen',this)">📊 Resumen</button>
+    <button class="nav-tab" onclick="goScreen('config',this)">⚙️ Drive</button>
+  </div>
+
+  <!-- NUEVO -->
+  <div class="screen active" id="screen-nuevo">
+    <div class="card"><div class="clabel">Categoría</div><div id="cat-grid" class="cat-grid"></div></div>
+    <div class="card">
+      <div class="clabel">Monto</div>
+      <div class="monto-wrap">
+        <span class="msign">$</span>
+        <input class="monto-input" id="monto-input" type="number" inputmode="numeric" placeholder="0">
+      </div>
+    </div>
+    <div class="card"><div class="clabel">Descripción (opcional)</div><input class="desc-input" id="desc-input" type="text" placeholder="¿En qué fue?"></div>
+    <button class="btn-main casa" id="btn-main" onclick="agregar()" disabled>Registrar</button>
+    <button class="btn-sync" onclick="syncDrive()">☁️ Sincronizar con Google Drive</button>
+    <button class="btn-sec" onclick="exportCSV()">⬇️ Exportar CSV</button>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="screen" id="screen-historial">
+    <div class="card"><div class="clabel" id="hist-lbl">Historial</div><div id="gastos-lista"></div></div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="screen" id="screen-resumen"><div id="resumen-content"></div></div>
+
+  <!-- CONFIG -->
+  <div class="screen" id="screen-config">
+    <div class="card">
+      <div class="clabel">Conexión Google Drive</div>
+      <div class="info-box">Pegá la URL del <strong>Google Apps Script</strong> para guardar los gastos directo en Drive, con un Excel nuevo cada mes.</div>
+      <input class="cfg-input" id="script-url" type="url" placeholder="https://script.google.com/macros/s/...">
+      <button class="btn-main casa" onclick="saveConfig()" style="margin-top:0">Guardar conexión</button>
+    </div>
+
+    <div class="card">
+      <div class="clabel">Presupuestos</div>
+      <div id="presup-form"></div>
+      <button class="btn-main casa" onclick="savePresup()" style="margin-top:14px">Guardar presupuestos</button>
+    </div>
+
+    <div class="card">
+      <div class="clabel">Cómo configurar</div>
+      <ol class="steps">
+        <li>Andá a <strong>script.google.com</strong> → Proyecto nuevo</li>
+        <li>Borrá el código de ejemplo y pegá el script de abajo</li>
+        <li>Guardá con <strong>Ctrl+S</strong></li>
+        <li>Click <strong>"Implementar" → "Nueva implementación"</strong></li>
+        <li>Tipo: <strong>App web</strong> · Acceso: <strong>Cualquier persona</strong></li>
+        <li>Copiá la URL y pegala arriba. ¡Listo! 🎉</li>
+      </ol>
+      <div class="sect" style="margin-top:16px">Código del script</div>
+      <div class="script-box" id="script-code"></div>
+      <button class="btn-copy" onclick="copyScript()">Copiar código</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = {
+  Casa: [{n:"Arriendo",e:"🏡"},{n:"Auto",e:"🚗"},{n:"Alimentos",e:"🥦"},{n:"Farmacia",e:"💊"},{n:"Tali",e:"👶"},{n:"Perritos",e:"🐶"},{n:"Hogar",e:"🛋️"},{n:"Otros",e:"📦"}],
+  Lindo:[{n:"Alimentos",e:"🥦"},{n:"Belleza",e:"✨"},{n:"Cafecitos",e:"☕"},{n:"Salidas",e:"🎉"},{n:"Deporte",e:"🏃"},{n:"Material",e:"🛍️"},{n:"Transporte",e:"🚌"},{n:"Entretenimiento",e:"🎬"},{n:"Otros",e:"📦"}],
+  Linda:[{n:"Alimentos",e:"🥦"},{n:"Belleza",e:"✨"},{n:"Cafecitos",e:"☕"},{n:"Salidas",e:"🎉"},{n:"Deporte",e:"🏃"},{n:"Material",e:"🛍️"},{n:"Transporte",e:"🚌"},{n:"Entretenimiento",e:"🎬"},{n:"Otros",e:"📦"}],
+};
+const PDEF = {
+  Casa: {general:1500000,Arriendo:600000,Auto:200000,Alimentos:200000,Farmacia:80000,Tali:100000,Perritos:80000,Hogar:150000,Otros:90000},
+  Lindo:{general:300000,Alimentos:80000,Belleza:30000,Cafecitos:20000,Salidas:40000,Deporte:30000,Material:25000,Transporte:30000,Entretenimiento:25000,Otros:20000},
+  Linda:{general:300000,Alimentos:80000,Belleza:30000,Cafecitos:20000,Salidas:40000,Deporte:30000,Material:25000,Transporte:30000,Entretenimiento:25000,Otros:20000},
+};
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const SCRIPT_CODE = `// GASTOS FAMILIA DE LA BARRA — Apps Script
+// Pegá esto en script.google.com → Implementar como App Web
+
+const FOLDER_NAME = "Gastos Familia De la Barra";
+const MESES_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (d.action==="registrar")      return registrar(d);
+    if (d.action==="setPresupuestos") return setPresup(d);
+    if (d.action==="getGastos")      return getGastos(d);
+    return resp({ok:false,error:"Acción desconocida"});
+  } catch(err){ return resp({ok:false,error:err.toString()}); }
+}
+
+function doGet(e){ return resp({ok:true,msg:"API activa ✓"}); }
+
+function getFolder(){
+  const f=DriveApp.getFoldersByName(FOLDER_NAME);
+  return f.hasNext()?f.next():DriveApp.createFolder(FOLDER_NAME);
+}
+
+function getSheet(mes,anio){
+  const root=getFolder();
+  const anioStr=anio.toString();
+  const mesNombre=MESES_ES[mes-1]+" "+anio;
+  let af=root.getFoldersByName(anioStr);
+  let anioFolder=af.hasNext()?af.next():root.createFolder(anioStr);
+  let files=anioFolder.getFilesByName(mesNombre);
+  let ss;
+  if(files.hasNext()){
+    ss=SpreadsheetApp.open(files.next());
+  } else {
+    ss=SpreadsheetApp.create(mesNombre);
+    DriveApp.getFileById(ss.getId()).moveTo(anioFolder);
+    initSheet(ss);
+  }
+  return ss;
+}
+
+function initSheet(ss){
+  ["Casa","Lindo","Linda"].forEach((p,i)=>{
+    let ws=i===0?ss.getSheets()[0]:ss.insertSheet();
+    ws.setName(p);
+    ws.appendRow(["Fecha","Categoría","Descripción","Monto"]);
+    ws.getRange(1,1,1,4).setFontWeight("bold")
+      .setBackground("#F5F2EC").setFontColor("#1C1814");
+    ws.setColumnWidth(1,100);ws.setColumnWidth(2,120);
+    ws.setColumnWidth(3,200);ws.setColumnWidth(4,100);
+  });
+  let pw=ss.insertSheet();
+  pw.setName("Presupuestos");
+  pw.appendRow(["Persona","Categoría","Monto"]);
+  pw.getRange(1,1,1,3).setFontWeight("bold").setBackground("#F5F2EC");
+}
+
+function registrar(d){
+  const now=new Date();
+  const mes=d.mes||(now.getMonth()+1);
+  const anio=d.anio||now.getFullYear();
+  const ss=getSheet(mes,anio);
+  const ws=ss.getSheetByName(d.persona);
+  if(!ws) return resp({ok:false,error:"Pestaña no encontrada"});
+  ws.appendRow([d.fecha,d.categoria,d.descripcion||"",d.monto]);
+  return resp({ok:true,msg:"Guardado en "+MESES_ES[mes-1]+" "+anio});
+}
+
+function setPresup(d){
+  const now=new Date();
+  const ss=getSheet(now.getMonth()+1,now.getFullYear());
+  let ws=ss.getSheetByName("Presupuestos");
+  ws.clearContents();
+  ws.appendRow(["Persona","Categoría","Monto"]);
+  d.rows.forEach(r=>ws.appendRow(r));
+  return resp({ok:true,msg:"Presupuestos guardados"});
+}
+
+function getGastos(d){
+  const now=new Date();
+  const ss=getSheet(d.mes||now.getMonth()+1,d.anio||now.getFullYear());
+  const result={};
+  ["Casa","Lindo","Linda"].forEach(p=>{
+    const ws=ss.getSheetByName(p);
+    result[p]=ws?ws.getDataRange().getValues():[];
+  });
+  return resp({ok:true,data:result});
+}
+
+function resp(obj){
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+// STATE
+let per='Casa', cat=null;
+let gastos=JSON.parse(localStorage.getItem('gfdb_g')||'[]');
+let presup=JSON.parse(localStorage.getItem('gfdb_p')||JSON.stringify(PDEF));
+let sUrl=localStorage.getItem('gfdb_url')||'';
+
+function init(){
+  const now=new Date();
+  document.getElementById('mes-label').textContent=MESES[now.getMonth()]+' '+now.getFullYear();
+  if(sUrl) document.getElementById('script-url').value=sUrl;
+  updateSyncUI();
+  document.getElementById('script-code').textContent=SCRIPT_CODE;
+  buildPresupForm();
+  renderCats();
+}
+
+function updateSyncUI(){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  if(sUrl){ dot.className='dot'; lbl.textContent='· Drive conectado'; lbl.style.color='var(--olive)'; }
+  else     { dot.className='dot off'; lbl.textContent='· Sin conexión Drive'; lbl.style.color='var(--ink3)'; }
+}
+
+function setPer(p,btn){
+  per=p; cat=null;
+  document.querySelectorAll('.persona-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const cl=p.toLowerCase();
+  document.getElementById('btn-main').className=`btn-main ${cl}`;
+  document.getElementById('btn-main').disabled=true;
+  renderCats();
+  if(document.getElementById('screen-historial').classList.contains('active'))renderHist();
+  if(document.getElementById('screen-resumen').classList.contains('active'))renderRes();
+}
+
+function renderCats(){
+  const cats=CATS[per], cl=per.toLowerCase();
+  const g=document.getElementById('cat-grid');
+  g.className=`cat-grid${cats.length>=9?' cols3':''}`;
+  g.innerHTML=cats.map(c=>`
+    <div class="cat-btn${cat===c.n?' selected '+cl:''}" onclick="selCat('${c.n}')">
+      <span class="ce">${c.e}</span><div class="cn">${c.n}</div>
+    </div>`).join('');
+}
+
+function selCat(n){ cat=n; renderCats(); document.getElementById('btn-main').disabled=false; }
+function emoji(p,n){ return (CATS[p]||[]).find(x=>x.n===n)?.e||'💸'; }
+
+function goScreen(name,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='historial')renderHist();
+  if(name==='resumen')renderRes();
+}
+
+async function agregar(){
+  const m=parseFloat(document.getElementById('monto-input').value);
+  const d=document.getElementById('desc-input').value.trim();
+  if(!cat) return toast('Elegí una categoría','err');
+  if(!m||m<=0) return toast('Ingresá un monto válido','err');
+  const now=new Date();
+  const g={id:Date.now(),persona:per,categoria:cat,monto:m,descripcion:d,fecha:now.toISOString(),mes:now.getMonth()+1,anio:now.getFullYear()};
+  gastos.unshift(g);
+  localStorage.setItem('gfdb_g',JSON.stringify(gastos));
+  document.getElementById('monto-input').value='';
+  document.getElementById('desc-input').value='';
+  const cg=cat; cat=null; renderCats();
+  document.getElementById('btn-main').disabled=true;
+  toast('$'+fmt(m)+' en '+cg,'ok');
+  if(sUrl) try{ await sendDrive(g); g.synced=true; localStorage.setItem('gfdb_g',JSON.stringify(gastos)); }catch(e){}
+}
+
+function renderHist(){
+  const cl=per.toLowerCase();
+  const now=new Date();
+  const list=gastos.filter(g=>g.persona===per&&g.mes===now.getMonth()+1&&g.anio===now.getFullYear());
+  document.getElementById('hist-lbl').textContent='Historial · '+per;
+  const el=document.getElementById('gastos-lista');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="ee">🌱</div><p>Sin gastos este mes</p></div>`;return;}
+  el.innerHTML=list.map(g=>{
+    const f=new Date(g.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'short'});
+    return `<div class="gi">
+      <div class="gi-icon ${cl}">${emoji(g.persona,g.categoria)}</div>
+      <div class="gi-info">
+        <div class="gi-cat">${g.categoria}</div>
+        <div class="gi-desc">${g.descripcion||'—'}</div>
+        <div class="gi-fecha">${f}</div>
+      </div>
+      <div class="gi-right">
+        <div class="gi-monto ${cl}">$${fmt(g.monto)}</div>
+        <button class="gi-del" onclick="del(${g.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function del(id){ gastos=gastos.filter(g=>g.id!==id); localStorage.setItem('gfdb_g',JSON.stringify(gastos)); renderHist(); toast('Eliminado'); }
+
+function renderRes(){
+  const cl=per.toLowerCase();
+  const p=presup[per]||PDEF[per];
+  const now=new Date();
+  const gs=gastos.filter(g=>g.persona===per&&g.mes===now.getMonth()+1&&g.anio===now.getFullYear());
+  const total=gs.reduce((s,g)=>s+g.monto,0);
+  const disp=p.general-total;
+  const pct=Math.min(total/p.general*100,100);
+  const ac=cl==='casa'?'var(--terra)':cl==='lindo'?'var(--sea)':'var(--olive)';
+  const bc=pct>90?'var(--terra)':pct>70?'var(--ochre)':ac;
+
+  let html=`<div class="hero ${cl}">
+    <div class="hlabel">Gastado este mes</div>
+    <div class="hamount ${cl}">$${fmt(total)}</div>
+    <div class="hsub">de <span>$${fmt(p.general)}</span> · disponible <span style="color:${disp<0?'var(--terra)':'inherit'}">$${fmt(Math.abs(disp))}</span>${disp<0?' 🔴':''}</div>
+    <div class="bar-wrap">
+      <div class="bar-hd"><span style="font-size:11px;color:var(--ink3)">Uso del presupuesto</span><span style="font-size:12px;font-weight:600;color:${bc}">${pct.toFixed(0)}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${bc}"></div></div>
+    </div>
+  </div>
+  <div class="sect">Por categoría</div>`;
+
+  CATS[per].forEach(c=>{
+    const gast=gs.filter(g=>g.categoria===c.n).reduce((s,g)=>s+g.monto,0);
+    const pC=p[c.n]||0, pctC=pC>0?Math.min(gast/pC*100,100):0;
+    const bcc=pctC>90?'var(--terra)':pctC>70?'var(--ochre)':ac;
+    html+=`<div class="cat-ri">
+      <div class="cri-top">
+        <span class="cri-name">${c.e} ${c.n}</span>
+        <span class="cri-amt"><strong>$${fmt(gast)}</strong> / $${fmt(pC)}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pctC}%;background:${bcc}"></div></div>
+    </div>`;
+  });
+
+  document.getElementById('resumen-content').innerHTML=html;
+}
+
+function buildPresupForm(){
+  const personas=['Casa','Lindo','Linda'];
+  let html='';
+  personas.forEach(p=>{
+    const cl=p.toLowerCase();
+    const ac=cl==='casa'?'var(--terra)':cl==='lindo'?'var(--sea)':'var(--olive)';
+    const pp=presup[p]||PDEF[p];
+    html+=`<div style="margin-bottom:20px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:${ac};margin-bottom:10px">${p}</div>
+      <div class="presup-row">
+        <label class="bold">General</label>
+        <div style="position:relative"><span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:13px">$</span>
+        <input type="number" class="presup-input" id="pp_${p}_general" value="${pp.general}"></div>
+      </div>`;
+    CATS[p].forEach(c=>{
+      html+=`<div class="presup-row">
+        <label>${c.e} ${c.n}</label>
+        <div style="position:relative"><span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:13px">$</span>
+        <input type="number" class="presup-input" id="pp_${p}_${c.n}" value="${pp[c.n]||0}"></div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('presup-form').innerHTML=html;
+}
+
+function savePresup(){
+  const np={};
+  ['Casa','Lindo','Linda'].forEach(p=>{
+    np[p]={general:getNum(`pp_${p}_general`)};
+    CATS[p].forEach(c=>{ np[p][c.n]=getNum(`pp_${p}_${c.n}`); });
+  });
+  presup=np;
+  localStorage.setItem('gfdb_p',JSON.stringify(presup));
+  toast('Presupuestos guardados','ok');
+  if(sUrl) syncPresupDrive();
+}
+
+function getNum(id){ return parseFloat(document.getElementById(id)?.value||0)||0; }
+
+function saveConfig(){
+  const url=document.getElementById('script-url').value.trim();
+  if(!url||!url.includes('script.google.com')) return toast('URL inválida','err');
+  sUrl=url; localStorage.setItem('gfdb_url',sUrl);
+  updateSyncUI(); toast('¡Drive conectado!','ok');
+}
+
+async function sendDrive(g){
+  await fetch(sUrl,{method:'POST',body:JSON.stringify({action:'registrar',persona:g.persona,categoria:g.categoria,descripcion:g.descripcion||'',monto:g.monto,fecha:new Date(g.fecha).toLocaleDateString('es-CL'),mes:g.mes,anio:g.anio})});
+}
+
+async function syncDrive(){
+  if(!sUrl){ toast('Configurá Drive primero','warn'); return; }
+  toast('Sincronizando…');
+  const pend=gastos.filter(g=>!g.synced);
+  let ok=0;
+  for(const g of pend){ try{ await sendDrive(g); g.synced=true; ok++; }catch(e){} }
+  localStorage.setItem('gfdb_g',JSON.stringify(gastos));
+  toast(ok>0?`✓ ${ok} gastos sincronizados`:'Todo al día','ok');
+}
+
+async function syncPresupDrive(){
+  if(!sUrl) return;
+  const rows=[];
+  ['Casa','Lindo','Linda'].forEach(p=>{ rows.push([p,'general',presup[p].general]); CATS[p].forEach(c=>rows.push([p,c.n,presup[p][c.n]||0])); });
+  try{ await fetch(sUrl,{method:'POST',body:JSON.stringify({action:'setPresupuestos',rows})}); }catch(e){}
+}
+
+function exportCSV(){
+  if(!gastos.length) return toast('Sin gastos para exportar','err');
+  let csv='Persona,Fecha,Categoría,Descripción,Monto\n';
+  [...gastos].reverse().forEach(g=>{
+    const f=new Date(g.fecha).toLocaleDateString('es-CL');
+    csv+=`${g.persona},${f},${g.categoria},"${g.descripcion||''}",${g.monto}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`gastos_${new Date().toLocaleDateString('es-CL').replace(/\//g,'-')}.csv`;
+  a.click();
+  toast('CSV descargado','ok');
+}
+
+function copyScript(){ navigator.clipboard.writeText(SCRIPT_CODE).then(()=>toast('Código copiado','ok')); }
+function fmt(n){ return Math.abs(n).toLocaleString('es-CL'); }
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast${type?' '+type:''} show`;
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>
