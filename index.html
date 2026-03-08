@@ -352,18 +352,37 @@ const FOLDER_NAME = "Gastos Familia De la Barra Schnitzler";
 const MESES_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
+function doGet(e) {
+  const action = e.parameter.action;
+  if (action === "getGastos") {
+    const mes  = parseInt(e.parameter.mes);
+    const anio = parseInt(e.parameter.anio);
+    return respGet(getGastosData(mes, anio));
+  }
+  return respGet({ok:true, msg:"API Gastos Familia v2 activa ✓"});
+}
+
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
-    if (d.action==="registrar") return registrar(d);
-    if (d.action==="editar")    return editar(d);
-    if (d.action==="borrar")    return borrar(d);
-    if (d.action==="getGastos") return getGastos(d);
-    if (d.action==="setPresupuestos") return setPresup(d);
-    return resp({ok:false,error:"Acción desconocida"});
-  } catch(err){ return resp({ok:false,error:err.toString()}); }
+    if (d.action==="registrar")       return respPost(registrar(d));
+    if (d.action==="editar")          return respPost(editar(d));
+    if (d.action==="borrar")          return respPost(borrar(d));
+    if (d.action==="setPresupuestos") return respPost(setPresup(d));
+    return respPost({ok:false, error:"Acción desconocida"});
+  } catch(err){ return respPost({ok:false, error:err.toString()}); }
 }
-function doGet(){ return resp({ok:true,msg:"API Gastos Familia v2 activa ✓"}); }
+
+function respGet(obj) {
+  const output = ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+  return output;
+}
+
+function respPost(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 function getFolder(){
   const f=DriveApp.getFoldersByName(FOLDER_NAME);
@@ -385,10 +404,9 @@ function initSheet(ss){
   ["Casa","Lindo","Linda"].forEach((p,i)=>{
     let ws=i===0?ss.getSheets()[0]:ss.insertSheet();
     ws.setName(p);
-    // ID en columna A (oculto), luego Fecha, Categoría, Descripción, Monto
     ws.appendRow(["ID","Fecha","Categoría","Descripción","Monto"]);
     ws.getRange(1,1,1,5).setFontWeight("bold").setBackground("#F5F2EC");
-    ws.hideColumns(1); // Oculta columna ID
+    ws.hideColumns(1);
     ws.setColumnWidth(2,100);ws.setColumnWidth(3,130);
     ws.setColumnWidth(4,200);ws.setColumnWidth(5,100);
     ws.getRange("E2:E1000").setNumberFormat("$#,##0");
@@ -405,9 +423,9 @@ function registrar(d){
   const anio=d.anio||now.getFullYear();
   const ss=getSheet(mes,anio);
   const ws=ss.getSheetByName(d.persona);
-  if(!ws) return resp({ok:false,error:"Pestaña no encontrada: "+d.persona});
+  if(!ws) return {ok:false,error:"Pestaña no encontrada: "+d.persona};
   ws.appendRow([d.id,d.fecha,d.categoria,d.descripcion||"",d.monto]);
-  return resp({ok:true,id:d.id});
+  return {ok:true,id:d.id};
 }
 
 function editar(d){
@@ -416,17 +434,17 @@ function editar(d){
   const anio=d.anio||now.getFullYear();
   const ss=getSheet(mes,anio);
   const ws=ss.getSheetByName(d.persona);
-  if(!ws) return resp({ok:false,error:"Pestaña no encontrada"});
+  if(!ws) return {ok:false,error:"Pestaña no encontrada"};
   const data=ws.getDataRange().getValues();
   for(let i=1;i<data.length;i++){
     if(String(data[i][0])===String(d.id)){
       ws.getRange(i+1,3).setValue(d.categoria);
       ws.getRange(i+1,4).setValue(d.descripcion||"");
       ws.getRange(i+1,5).setValue(d.monto);
-      return resp({ok:true});
+      return {ok:true};
     }
   }
-  return resp({ok:false,error:"Gasto no encontrado: "+d.id});
+  return {ok:false,error:"Gasto no encontrado"};
 }
 
 function borrar(d){
@@ -435,30 +453,33 @@ function borrar(d){
   const anio=d.anio||now.getFullYear();
   const ss=getSheet(mes,anio);
   const ws=ss.getSheetByName(d.persona);
-  if(!ws) return resp({ok:false,error:"Pestaña no encontrada"});
+  if(!ws) return {ok:false,error:"Pestaña no encontrada"};
   const data=ws.getDataRange().getValues();
   for(let i=1;i<data.length;i++){
     if(String(data[i][0])===String(d.id)){
       ws.deleteRow(i+1);
-      return resp({ok:true});
+      return {ok:true};
     }
   }
-  return resp({ok:false,error:"Gasto no encontrado"});
+  return {ok:false,error:"Gasto no encontrado"};
 }
 
-function getGastos(d){
+function getGastosData(mes,anio){
   const now=new Date();
-  const ss=getSheet(d.mes||now.getMonth()+1,d.anio||now.getFullYear());
+  const m=mes||(now.getMonth()+1);
+  const a=anio||now.getFullYear();
+  const ss=getSheet(m,a);
   const result={};
   ["Casa","Lindo","Linda"].forEach(p=>{
     const ws=ss.getSheetByName(p);
     if(!ws){result[p]=[];return;}
     const rows=ws.getDataRange().getValues().slice(1);
     result[p]=rows.filter(r=>r[0]).map(r=>({
-      id:r[0],fecha:r[1],categoria:r[2],descripcion:r[3],monto:r[4]
+      id:String(r[0]),fecha:Utilities.formatDate(new Date(r[1]),Session.getScriptTimeZone(),"dd/MM/yyyy"),
+      categoria:r[2],descripcion:r[3],monto:r[4]
     }));
   });
-  return resp({ok:true,data:result});
+  return {ok:true,data:result};
 }
 
 function setPresup(d){
@@ -468,12 +489,7 @@ function setPresup(d){
   ws.clearContents();
   ws.appendRow(["Persona","Categoría","Monto"]);
   d.rows.forEach(r=>ws.appendRow(r));
-  return resp({ok:true});
-}
-
-function resp(obj){
-  return ContentService.createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+  return {ok:true};
 }`;
 
 // ══════════════════════════════════════
@@ -929,12 +945,11 @@ async function fetchGastosDrive(){
   if(!sUrl) return null;
   try{
     const now=new Date();
-    const r=await fetch(sUrl,{method:'POST',body:JSON.stringify({
-      action:'getGastos',mes:now.getMonth()+1,anio:now.getFullYear()
-    })});
+    // Use GET — avoids CORS issues with Apps Script
+    const url=sUrl+'?action=getGastos&mes='+(now.getMonth()+1)+'&anio='+now.getFullYear();
+    const r=await fetch(url);
     const d=await r.json();
     if(!d.ok||!d.data) return null;
-    // Convert Drive format to app format
     const result=[];
     ['Casa','Lindo','Linda'].forEach(persona=>{
       const rows=d.data[persona]||[];
@@ -954,7 +969,6 @@ async function fetchGastosDrive(){
         });
       });
     });
-    // Sort newest first (by id which starts with timestamp)
     result.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
     return result;
   }catch(e){
