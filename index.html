@@ -242,13 +242,13 @@
     </div>
     <div class="card"><div class="clabel">Descripción (opcional)</div><input class="desc-input" id="desc-input" type="text" placeholder="¿En qué fue?"></div>
     <button class="btn-main casa" id="btn-main" onclick="agregar()" disabled>Registrar</button>
-    <button class="btn-sync" onclick="syncAll()">☁️ Sincronizar pendientes</button>
+    <button class="btn-sync" onclick="syncAll()">☁️ Actualizar desde Drive</button>
     <button class="btn-sec" onclick="exportCSV()">⬇️ Exportar CSV</button>
   </div>
 
   <!-- HISTORIAL -->
   <div class="screen" id="screen-historial">
-    <div class="card"><div class="clabel" id="hist-lbl">Historial</div><div id="gastos-lista"></div></div>
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="clabel" id="hist-lbl">Historial</div><button onclick="loadFromDrive(false)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink3);padding:0 0 4px">↻</button></div><div id="gastos-lista"></div></div>
   </div>
 
   <!-- RESUMEN -->
@@ -500,8 +500,45 @@ function init(){
   buildPresupForm();
   renderCats();
   updatePendingBadge();
-  // Si hay internet y hay pendientes, intentar sync automático al abrir
-  if(sUrl && queue.length>0) setTimeout(()=>processQueue(true),2000);
+  // Auto-load from Drive on open
+  if(sUrl) loadFromDrive(true);
+  else if(queue.length>0) setTimeout(()=>processQueue(true),1000);
+}
+
+async function loadFromDrive(silent=false){
+  if(!sUrl) return;
+  if(!silent) toast('Cargando desde Drive...');
+  setLoading(true);
+  // First flush any pending queue
+  if(queue.length>0) await processQueue(true);
+  const driveGastos=await fetchGastosDrive();
+  setLoading(false);
+  if(driveGastos===null){
+    if(!silent) toast('Sin conexión — mostrando datos locales','warn');
+    return;
+  }
+  // Merge: keep local unsynced + drive data
+  const localPending=gastos.filter(g=>!g.synced);
+  // Drive is source of truth, add local pending on top
+  gastos=[...localPending,...driveGastos.filter(dg=>!localPending.find(lp=>lp.id===dg.id))];
+  gastos.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+  saveGastos();
+  // Refresh current view
+  if(document.getElementById('screen-historial').classList.contains('active')) renderHist();
+  if(document.getElementById('screen-resumen').classList.contains('active')) renderRes();
+  if(!silent) toast('¡Datos actualizados! ✓','ok');
+}
+
+function setLoading(on){
+  // Show/hide loading indicator in sync label
+  const lbl=document.getElementById('sync-label');
+  if(on){
+    lbl.textContent='· Cargando...';
+    lbl.style.color='var(--ochre)';
+    document.getElementById('sync-dot').className='dot pending';
+  } else {
+    updateSyncUI();
+  }
 }
 
 function updateSyncUI(){
@@ -875,9 +912,54 @@ function renderRes(){
 async function driveOp(payload){
   if(!sUrl) return false;
   try{
-    await fetch(sUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
-    return true;
-  }catch(e){return false;}
+    const r=await fetch(sUrl,{method:'POST',body:JSON.stringify(payload)});
+    const d=await r.json();
+    return d.ok!==false;
+  }catch(e){
+    // fallback no-cors (CORS might block read but write still works)
+    try{
+      await fetch(sUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      return true;
+    }catch(e2){return false;}
+  }
+}
+
+// Fetch gastos from Drive — returns array or null on fail
+async function fetchGastosDrive(){
+  if(!sUrl) return null;
+  try{
+    const now=new Date();
+    const r=await fetch(sUrl,{method:'POST',body:JSON.stringify({
+      action:'getGastos',mes:now.getMonth()+1,anio:now.getFullYear()
+    })});
+    const d=await r.json();
+    if(!d.ok||!d.data) return null;
+    // Convert Drive format to app format
+    const result=[];
+    ['Casa','Lindo','Linda'].forEach(persona=>{
+      const rows=d.data[persona]||[];
+      rows.forEach(row=>{
+        if(!row.id) return;
+        result.push({
+          id:String(row.id),
+          persona,
+          categoria:row.categoria||'',
+          descripcion:row.descripcion||'',
+          monto:parseFloat(row.monto)||0,
+          fecha:row.fecha||'',
+          fechaISO:row.fecha||'',
+          mes:now.getMonth()+1,
+          anio:now.getFullYear(),
+          synced:true
+        });
+      });
+    });
+    // Sort newest first (by id which starts with timestamp)
+    result.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+    return result;
+  }catch(e){
+    return null;
+  }
 }
 
 // Cola offline
@@ -911,7 +993,7 @@ async function processQueue(silent=false){
   if(!silent) toast(failed.length===0?'¡Todo sincronizado! ✓':failed.length+' operaciones fallaron','ok');
 }
 
-async function syncAll(){ await processQueue(false); }
+async function syncAll(){ await loadFromDrive(false); }
 
 // ══════════════════════════════════════
 // PRESUPUESTOS
