@@ -193,6 +193,44 @@
   .alert-sub{font-size:13px;color:var(--ink3);margin-top:2px;}
   .alert-close{margin-left:auto;background:none;border:none;font-size:18px;color:var(--ink3);cursor:pointer;flex-shrink:0;padding:4px;}
 
+
+  /* TEMPONOVO */
+  .tempo-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .tempo-item:last-child{border-bottom:none;}
+  .tempo-item.cobrado{opacity:.45;}
+  .tempo-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .tempo-check.done{background:var(--olive);border-color:var(--olive);color:white;}
+  .tempo-info{flex:1;min-width:0;}
+  .tempo-desc{font-size:15px;font-weight:600;color:var(--ink);}
+  .tempo-desc.cobrado{text-decoration:line-through;color:var(--ink3);}
+  .tempo-meta{font-size:12px;color:var(--ink3);margin-top:2px;font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .tempo-right{text-align:right;flex-shrink:0;}
+  .tempo-monto{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--sea);}
+  .tempo-monto.cobrado{color:var(--olive);}
+  .tempo-del{background:none;border:none;color:var(--line);font-size:13px;cursor:pointer;padding:3px;display:block;margin-top:4px;transition:color .2s;}
+  .tempo-del:hover{color:var(--terra);}
+  .tempo-summary{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-radius:12px;margin-bottom:14px;}
+  .tempo-summary.pending{background:rgba(42,80,96,.07);border:1.5px solid rgba(42,80,96,.2);}
+  .tempo-summary.all-done{background:rgba(107,122,58,.08);border:1.5px solid rgba(107,122,58,.3);}
+
+  /* TEMPONOVO */
+  .tempo-item{display:flex;align-items:flex-start;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);}
+  .tempo-item:last-child{border-bottom:none;}
+  .tempo-item.cobrado{opacity:.4;}
+  .tempo-check{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer;flex-shrink:0;margin-top:1px;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;}
+  .tempo-check.done{background:var(--olive);border-color:var(--olive);}
+  .tempo-info{flex:1;min-width:0;}
+  .tempo-desc-text{font-size:15px;font-weight:600;color:var(--ink);}
+  .tempo-desc-text.tachado{text-decoration:line-through;color:var(--ink3);}
+  .tempo-meta{font-size:12px;color:var(--ink3);margin-top:3px;font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .tempo-right{text-align:right;flex-shrink:0;}
+  .tempo-monto{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--sea);}
+  .tempo-monto.cobrado{color:var(--olive);}
+  .tempo-del{background:none;border:none;color:var(--line);font-size:13px;cursor:pointer;padding:3px;display:block;margin-top:4px;transition:color .2s;}
+  .tempo-del:hover{color:var(--terra);}
+  .tempo-hero{border-radius:var(--radius);padding:20px 22px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .tempo-hero.pending{background:rgba(42,80,96,.07);border:1.5px solid rgba(42,80,96,.2);}
+  .tempo-hero.done{background:rgba(107,122,58,.08);border:1.5px solid rgba(107,122,58,.3);}
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--white);padding:14px 28px;border-radius:99px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.4,.64,1);white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.2);}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .toast.ok{background:var(--olive);}
@@ -227,7 +265,8 @@
     <button class="nav-tab active" onclick="goScreen('nuevo',this)">➕ Nuevo</button>
     <button class="nav-tab" onclick="goScreen('historial',this)">📋 Historial</button>
     <button class="nav-tab" onclick="goScreen('resumen',this)">📊 Resumen</button>
-    <button class="nav-tab" onclick="goScreen('config',this)">⚙️ Drive</button>
+    <button class="nav-tab" onclick="goScreen('tempo',this)">🏪 Tempo</button>
+    <button class="nav-tab" onclick="goScreen('config',this)">⚙️</button>
   </div>
 
   <!-- NUEVO -->
@@ -253,6 +292,39 @@
 
   <!-- RESUMEN -->
   <div class="screen" id="screen-resumen"><div id="resumen-content"></div></div>
+
+
+  <!-- TEMPONOVO -->
+  <div class="screen" id="screen-tempo">
+
+    <!-- Hero resumen -->
+    <div id="tempo-hero" style="display:none"></div>
+
+    <!-- Input -->
+    <div class="card">
+      <div class="clabel">Gasto empresa — para cobrar</div>
+      <input class="desc-input" id="tempo-desc" type="text" placeholder="¿Qué pagaste? (taxi, almuerzo, etc)">
+      <div class="monto-wrap" style="margin-top:10px">
+        <span class="msign" style="font-size:28px">$</span>
+        <input class="monto-input" id="tempo-monto" type="text" inputmode="numeric"
+          placeholder="0" oninput="onTempoMonto(this)"
+          style="font-size:34px;min-height:68px;padding:14px 14px 14px 46px">
+      </div>
+      <button class="btn-main lindo" id="tempo-btn" onclick="addTempo()" style="margin-top:12px" disabled>
+        Anotar para cobrar
+      </button>
+    </div>
+
+    <!-- Lista -->
+    <div class="card" id="tempo-card" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="clabel" style="margin-bottom:0">Gastos anotados</div>
+        <button onclick="clearCobrados()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--ink3);cursor:pointer;letter-spacing:.5px;text-transform:uppercase">Limpiar cobrados</button>
+      </div>
+      <div id="tempo-lista"></div>
+    </div>
+
+  </div>
 
   <!-- CONFIG -->
   <div class="screen" id="screen-config">
@@ -507,6 +579,21 @@ let editId=null, mCat=null, mMontoStr='';
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
+
+// ══════════════════════════════════════
+// TEMPONOVO — gastos empresa para cobrar
+// ══════════════════════════════════════
+let tempoItems = JSON.parse(localStorage.getItem('gfdb_tempo') || '[]');
+
+function onTempoMonto(el){
+  const raw = el.value.replace(/\D/g,'');
+  const num = parseInt(raw)||0;
+  el.dataset.raw = raw;
+  el.value = num>0 ? num.toLocaleString('es-CL') : '';
+  document.getElementById('tempo-btn').disabled = !(num>0);
+}
+
+
 function init(){
   const now=new Date();
   document.getElementById('mes-label').textContent=MESES[now.getMonth()]+' '+now.getFullYear();
@@ -515,6 +602,7 @@ function init(){
   updateSyncUI();
   buildPresupForm();
   renderCats();
+  renderTempo();
   updatePendingBadge();
   // Auto-load from Drive on open
   if(sUrl) loadFromDrive(true);
@@ -1154,6 +1242,101 @@ function gastosDelMes(p,mes,anio){
   return gastos.filter(g=>g.persona===p&&g.mes===mes&&g.anio===anio);
 }
 function saveGastos(){localStorage.setItem('gfdb_g',JSON.stringify(gastos));}
+
+function onTempoMonto(el){
+  const raw = el.value.replace(/\D/g,'');
+  const num = parseInt(raw)||0;
+  el.dataset.raw = raw;
+  el.value = num>0 ? num.toLocaleString('es-CL') : '';
+  document.getElementById('tempo-btn').disabled = !(num>0);
+}
+
+function addTempo(){
+  const descEl  = document.getElementById('tempo-desc');
+  const montoEl = document.getElementById('tempo-monto');
+  const desc    = descEl.value.trim();
+  const monto   = parseInt(montoEl.dataset.raw || montoEl.value.replace(/\D/g,''))||0;
+  if(!desc)  return toast('Describí el gasto','err');
+  if(!monto) return toast('Ingresá un monto','err');
+  tempoItems.unshift({
+    id: Date.now(), desc, monto,
+    fecha: new Date().toLocaleDateString('es-CL'),
+    cobrado: false, fechaCobro: null
+  });
+  saveTempo();
+  descEl.value=''; montoEl.value=''; montoEl.dataset.raw='';
+  document.getElementById('tempo-btn').disabled=true;
+  renderTempo();
+  toast('Anotado — $'+fmt(monto)+' para cobrar','ok');
+}
+
+function toggleCobrado(id){
+  const item = tempoItems.find(x=>x.id===id);
+  if(!item) return;
+  item.cobrado = !item.cobrado;
+  item.fechaCobro = item.cobrado ? new Date().toLocaleDateString('es-CL') : null;
+  saveTempo(); renderTempo();
+  if(item.cobrado) toast('¡Cobrado! $'+fmt(item.monto),'ok');
+}
+
+function delTempo(id){
+  tempoItems = tempoItems.filter(x=>x.id!==id);
+  saveTempo(); renderTempo();
+}
+
+function clearCobrados(){
+  const n = tempoItems.filter(x=>x.cobrado).length;
+  if(!n) return toast('No hay cobrados para limpiar','warn');
+  tempoItems = tempoItems.filter(x=>!x.cobrado);
+  saveTempo(); renderTempo();
+  toast(n+' cobrado'+(n>1?'s':'')+' eliminado'+(n>1?'s':''));
+}
+
+function renderTempo(){
+  const hero  = document.getElementById('tempo-hero');
+  const card  = document.getElementById('tempo-card');
+  const lista = document.getElementById('tempo-lista');
+  if(!hero||!card||!lista) return;
+  if(!tempoItems.length){
+    hero.style.display='none'; card.style.display='none'; return;
+  }
+  card.style.display='block';
+  const pend    = tempoItems.filter(x=>!x.cobrado);
+  const cob     = tempoItems.filter(x=>x.cobrado);
+  const totPend = pend.reduce((s,x)=>s+x.monto,0);
+  const totCob  = cob.reduce((s,x)=>s+x.monto,0);
+  const allDone = pend.length===0 && cob.length>0;
+  hero.style.display='flex';
+  hero.className='tempo-hero '+(allDone?'done':'pending');
+  hero.innerHTML=`
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sea);margin-bottom:4px">Por cobrar</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--sea);line-height:1">${pend.length>0?'$'+fmt(totPend):'—'}</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:3px">${pend.length} pendiente${pend.length!==1?'s':''}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--olive);margin-bottom:4px">Ya cobrado</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--olive);line-height:1">${cob.length>0?'$'+fmt(totCob):'—'}</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:3px">${cob.length} cobrado${cob.length!==1?'s':''}</div>
+    </div>`;
+  lista.innerHTML = tempoItems.map(item=>`
+    <div class="tempo-item${item.cobrado?' cobrado':''}">
+      <button class="tempo-check${item.cobrado?' done':''}" onclick="toggleCobrado(${item.id})">
+        ${item.cobrado?'✓':''}
+      </button>
+      <div class="tempo-info">
+        <div class="tempo-desc-text${item.cobrado?' tachado':''}">${item.desc}</div>
+        <div class="tempo-meta">${item.fecha}${item.cobrado?' · cobrado el '+item.fechaCobro:''}</div>
+      </div>
+      <div class="tempo-right">
+        <div class="tempo-monto${item.cobrado?' cobrado':''}">$${fmt(item.monto)}</div>
+        <button class="tempo-del" onclick="delTempo(${item.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function saveTempo(){ localStorage.setItem('gfdb_tempo', JSON.stringify(tempoItems)); }
+
 function fmt(n){return Math.abs(Math.round(n)).toLocaleString('es-CL');}
 function toast(msg,type=''){
   const t=document.getElementById('toast');
