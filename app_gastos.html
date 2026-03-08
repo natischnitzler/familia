@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Gastos Familia De la Barra Schnitzler</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terra:#C1522A; --sand:#E8DCC8; --olive:#6B7A3A;
+    --ochre:#C89030; --sea:#2A5060;
+    --bg:#F5F2EC; --white:#FDFCF9;
+    --ink:#1C1814; --ink2:#4A3F35; --ink3:#9A8878;
+    --line:#DDD5C4; --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;font-size:16px;}
+
+  .header{background:var(--white);padding:44px 24px 16px;border-bottom:1.5px solid var(--line);}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--terra);margin-bottom:5px;}
+  .header h1{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;line-height:1.0;color:var(--ink);white-space:nowrap;}
+  .header h1 em{font-style:italic;color:var(--terra);}
+  .tagline{margin-top:6px;font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--ink3);}
+  .status-row{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .month-chip{display:inline-flex;align-items:center;gap:7px;background:var(--sand);padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;color:var(--ink2);}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--olive);display:inline-block;flex-shrink:0;}
+  .dot.off{background:var(--ink3);}
+  .dot.pending{background:var(--ochre);}
+  .offline-badge{display:none;background:rgba(200,144,48,.15);border:1px solid var(--ochre);color:var(--ochre);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+  .offline-badge.show{display:inline-flex;align-items:center;gap:5px;}
+
+  .persona-tabs{display:flex;background:var(--white);border-bottom:1.5px solid var(--line);}
+  .persona-tab{flex:1;padding:16px 8px;border:none;background:transparent;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;margin-bottom:-1.5px;}
+  .persona-tab .te{font-size:20px;display:block;margin-bottom:4px;}
+  .persona-tab.active{color:var(--ink);font-weight:600;}
+  .persona-tab.active.casa{border-bottom-color:var(--terra);}
+  .persona-tab.active.lindo{border-bottom-color:var(--sea);}
+  .persona-tab.active.linda{border-bottom-color:var(--olive);}
+
+  .main{padding:20px 20px 50px;}
+  .nav-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--white);border-radius:12px;padding:5px;border:1.5px solid var(--line);}
+  .nav-tab{flex:1;padding:11px 4px;border-radius:9px;border:none;background:transparent;font-family:'Jost',sans-serif;font-size:11px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s;}
+  .nav-tab.active{background:var(--bg);color:var(--ink);font-weight:700;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .card{background:var(--white);border-radius:var(--radius);padding:22px;margin-bottom:14px;border:1.5px solid var(--line);}
+  .clabel{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:16px;}
+
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cat-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+  .cat-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:16px 6px;text-align:center;cursor:pointer;transition:all .18s;font-family:'Jost',sans-serif;}
+  .cat-btn .ce{font-size:26px;display:block;margin-bottom:6px;}
+  .cat-btn .cn{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.2;}
+  .cat-btn:active{transform:scale(.94);}
+  .cat-btn.selected.casa{background:rgba(193,82,42,.1);border-color:var(--terra);}
+  .cat-btn.selected.casa .cn{color:var(--terra);font-weight:700;}
+  .cat-btn.selected.lindo{background:rgba(42,80,96,.1);border-color:var(--sea);}
+  .cat-btn.selected.lindo .cn{color:var(--sea);font-weight:700;}
+  .cat-btn.selected.linda{background:rgba(107,122,58,.1);border-color:var(--olive);}
+  .cat-btn.selected.linda .cn{color:var(--olive);font-weight:700;}
+
+  .monto-wrap{position:relative;}
+  .msign{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--ink3);pointer-events:none;}
+
+  .monto-input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:20px 20px 20px 48px;font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--ink);outline:none;transition:border-color .2s;text-align:right;-webkit-appearance:none;appearance:none;}
+  .monto-input::-webkit-inner-spin-button,.monto-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  .monto-input::placeholder{color:var(--ink3);}
+  .monto-input:focus{border-color:var(--terra);}
+  .monto-input.lindo:focus{border-color:var(--sea);}
+  .monto-input.linda:focus{border-color:var(--olive);}
+  .desc-input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:16px 17px;font-family:'Jost',sans-serif;font-size:16px;color:var(--ink);outline:none;transition:border-color .2s;}
+  .desc-input::placeholder{color:var(--ink3);}
+  .desc-input:focus{border-color:var(--terra);}
+
+  .btn-main{width:100%;padding:18px;border-radius:13px;border:none;font-family:'Jost',sans-serif;font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);cursor:pointer;transition:all .2s;}
+  .btn-main.casa{background:var(--terra);}
+  .btn-main.lindo{background:var(--sea);}
+  .btn-main.linda{background:var(--olive);}
+  .btn-main:active{opacity:.85;transform:scale(.98);}
+  .btn-main:disabled{opacity:.28;cursor:not-allowed;transform:none;}
+  .btn-sec{width:100%;padding:14px;border-radius:13px;border:1.5px solid var(--line);background:transparent;font-family:'Jost',sans-serif;font-size:14px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s;margin-top:10px;}
+  .btn-sec:hover{border-color:var(--ink3);color:var(--ink2);}
+  .btn-sync{width:100%;padding:16px;border-radius:13px;border:1.5px dashed var(--ochre);background:rgba(200,144,48,.06);font-family:'Jost',sans-serif;font-size:14px;font-weight:600;color:var(--ochre);cursor:pointer;transition:all .2s;margin-top:10px;}
+
+  /* HISTORIAL */
+  .gi{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);animation:fi .25s ease;}
+  .gi:last-child{border-bottom:none;}
+  @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .gi-icon{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .gi-icon.casa{background:rgba(193,82,42,.1);}
+  .gi-icon.lindo{background:rgba(42,80,96,.1);}
+  .gi-icon.linda{background:rgba(107,122,58,.1);}
+  .gi-info{flex:1;min-width:0;}
+  .gi-cat{font-size:15px;font-weight:600;}
+  .gi-desc{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .gi-fecha{font-size:12px;color:var(--ink3);font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:3px;}
+  .gi-pending{font-size:10px;color:var(--ochre);font-weight:600;margin-top:2px;}
+  .gi-right{text-align:right;flex-shrink:0;}
+  .gi-monto{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+  .gi-monto.casa{color:var(--terra);}
+  .gi-monto.lindo{color:var(--sea);}
+  .gi-monto.linda{color:var(--olive);}
+  .gi-actions{display:flex;gap:6px;margin-top:5px;justify-content:flex-end;}
+  .gi-btn{background:none;border:none;font-size:15px;cursor:pointer;padding:3px 5px;color:var(--ink3);transition:color .2s;border-radius:6px;}
+  .gi-btn:hover{color:var(--terra);background:rgba(193,82,42,.08);}
+  .gi-btn.edit:hover{color:var(--sea);background:rgba(42,80,96,.08);}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--ink3);}
+  .empty .ee{font-size:50px;margin-bottom:14px;}
+  .empty p{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;}
+
+  /* LOADING */
+  .loading{text-align:center;padding:30px;color:var(--ink3);}
+  .spinner{width:28px;height:28px;border:2.5px solid var(--line);border-top-color:var(--terra);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* RESUMEN */
+  .hero{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--line);padding:24px;margin-bottom:14px;}
+  .hlabel{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);}
+  .hamount{font-family:'Cormorant Garamond',serif;font-size:54px;font-weight:600;line-height:1;margin:8px 0 5px;}
+  .hamount.casa{color:var(--terra);}
+  .hamount.lindo{color:var(--sea);}
+  .hamount.linda{color:var(--olive);}
+  .hsub{font-size:14px;color:var(--ink3);}
+  .hsub span{font-weight:600;color:var(--ink2);}
+  .bar-wrap{margin-top:18px;}
+  .bar-hd{display:flex;justify-content:space-between;margin-bottom:6px;}
+  .bar-bg{height:7px;background:var(--sand);border-radius:99px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:99px;transition:width .6s;}
+  .cat-ri{background:var(--white);border-radius:13px;border:1.5px solid var(--line);padding:16px 18px;margin-bottom:10px;}
+  .cri-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .cri-name{font-size:15px;font-weight:500;}
+  .cri-amt{font-size:13px;color:var(--ink3);}
+  .cri-amt strong{color:var(--ink2);font-weight:600;font-size:14px;}
+  .sect{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin:22px 0 12px;}
+
+  /* MODAL EDITAR */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(28,24,20,.5);z-index:100;align-items:flex-end;justify-content:center;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--white);border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:430px;animation:slideup .3s cubic-bezier(.34,1.3,.64,1);}
+  @keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
+  .modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;margin-bottom:20px;color:var(--ink);}
+  .modal-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;margin-top:16px;display:block;}
+  .modal-cats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;}
+  .modal-monto-display{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:16px 16px 16px 44px;font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--ink);text-align:right;min-height:68px;display:flex;align-items:center;justify-content:flex-end;}
+  .modal-numpad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+  .modal-desc{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;font-family:'Jost',sans-serif;font-size:15px;color:var(--ink);outline:none;margin-top:4px;}
+  .modal-desc::placeholder{color:var(--ink3);}
+  .modal-btns{display:flex;gap:10px;margin-top:20px;}
+  .modal-btns .btn-main{flex:2;}
+  .modal-cancel{flex:1;padding:16px;border-radius:13px;border:1.5px solid var(--line);background:transparent;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;}
+
+  /* CONFIG */
+  .cfg-input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:15px 16px;font-family:'Jost',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s;margin-bottom:12px;}
+  .cfg-input:focus{border-color:var(--ochre);}
+  .cfg-input::placeholder{color:var(--ink3);}
+  .info-box{background:rgba(200,144,48,.07);border:1.5px solid rgba(200,144,48,.22);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:14px;}
+  .info-box strong{color:var(--ochre);}
+  .connected-box{background:rgba(107,122,58,.08);border:1.5px solid rgba(107,122,58,.3);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+  .steps{list-style:none;counter-reset:s;}
+  .steps li{counter-increment:s;padding:10px 0 10px 36px;position:relative;font-size:14px;color:var(--ink2);border-bottom:1px solid var(--line);line-height:1.5;}
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:11px;width:22px;height:22px;background:var(--terra);color:white;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .script-box{background:var(--ink);color:#C8D8C0;border-radius:12px;padding:16px;font-family:monospace;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre;margin:12px 0;max-height:180px;overflow-y:auto;}
+  .btn-copy{width:100%;padding:13px;border-radius:11px;border:1.5px solid var(--line);background:transparent;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s;}
+  .btn-copy:hover{border-color:var(--sea);color:var(--sea);}
+  .presup-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .presup-row label{flex:1;font-size:14px;color:var(--ink3);}
+  .presup-row label.bold{font-weight:700;color:var(--ink2);font-size:15px;}
+  .presup-input-wrap{position:relative;display:inline-block;}
+  .presup-input-wrap span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:13px;pointer-events:none;}
+  .presup-input{width:140px;padding:10px 10px 10px 24px;border:1.5px solid var(--line);border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;background:var(--bg);color:var(--ink);outline:none;}
+  .presup-sum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;margin-bottom:14px;margin-top:4px;}
+  .presup-sum-row.ok{background:rgba(107,122,58,.1);border:1.5px solid rgba(107,122,58,.3);}
+  .presup-sum-row.over{background:rgba(193,82,42,.08);border:1.5px solid rgba(193,82,42,.3);}
+  .presup-sum-label{font-size:12px;font-weight:600;color:var(--ink3);}
+  .presup-sum-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+
+
+  /* ALERT BANNER */
+  .alert-banner{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-120px);width:100%;max-width:430px;z-index:200;transition:transform .4s cubic-bezier(.34,1.2,.64,1);padding:0 0 0 0;}
+  .alert-banner.show{transform:translateX(-50%) translateY(0);}
+  .alert-inner{margin:10px 16px;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.18);}
+  .alert-inner.warn50{background:#FFF8E8;border:1.5px solid var(--ochre);}
+  .alert-inner.warn75{background:#FFF3E0;border:1.5px solid #E08020;}
+  .alert-inner.warn100{background:#FFF0EE;border:1.5px solid var(--terra);}
+  .alert-emoji{font-size:30px;flex-shrink:0;}
+  .alert-text{}
+  .alert-title{font-size:15px;font-weight:700;color:var(--ink);}
+  .alert-sub{font-size:13px;color:var(--ink3);margin-top:2px;}
+  .alert-close{margin-left:auto;background:none;border:none;font-size:18px;color:var(--ink3);cursor:pointer;flex-shrink:0;padding:4px;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--white);padding:14px 28px;border-radius:99px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.4,.64,1);white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.2);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.ok{background:var(--olive);}
+  .toast.err{background:var(--terra);}
+  .toast.warn{background:var(--ochre);color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <h1>Gastos Familia <em>De la Barra Schnitzler</em></h1>
+  <div class="tagline">Si cuidamos la casa, la casa nos cuida</div>
+  <div class="status-row">
+    <div class="month-chip">
+      <span class="dot off" id="sync-dot"></span>
+      <span id="mes-label"></span>
+      <span id="sync-label" style="color:var(--ink3)">· Sin conexión</span>
+    </div>
+    <div class="offline-badge" id="offline-badge">⏳ <span id="pending-count">0</span> pendientes</div>
+  </div>
+</div>
+
+<div class="persona-tabs">
+  <button class="persona-tab casa active" onclick="setPer('Casa',this)"><span class="te">🏠</span>Casa</button>
+  <button class="persona-tab lindo" onclick="setPer('Lindo',this)"><span class="te">👨</span>Lindo</button>
+  <button class="persona-tab linda" onclick="setPer('Linda',this)"><span class="te">👩</span>Linda</button>
+</div>
+
+<div class="main">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goScreen('nuevo',this)">➕ Nuevo</button>
+    <button class="nav-tab" onclick="goScreen('historial',this)">📋 Historial</button>
+    <button class="nav-tab" onclick="goScreen('resumen',this)">📊 Resumen</button>
+    <button class="nav-tab" onclick="goScreen('config',this)">⚙️ Drive</button>
+  </div>
+
+  <!-- NUEVO -->
+  <div class="screen active" id="screen-nuevo">
+    <div class="card"><div class="clabel">Categoría</div><div id="cat-grid" class="cat-grid"></div></div>
+    <div class="card">
+      <div class="clabel">Monto</div>
+      <div class="monto-wrap">
+        <span class="msign">$</span>
+        <input class="monto-input" id="monto-input" type="text" inputmode="numeric" placeholder="0" oninput="onMontoInput(this)" autofocus>
+      </div>
+    </div>
+    <div class="card"><div class="clabel">Descripción (opcional)</div><input class="desc-input" id="desc-input" type="text" placeholder="¿En qué fue?"></div>
+    <button class="btn-main casa" id="btn-main" onclick="agregar()" disabled>Registrar</button>
+    <button class="btn-sync" onclick="syncAll()">☁️ Actualizar desde Drive</button>
+    <button class="btn-sec" onclick="exportCSV()">⬇️ Exportar CSV</button>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="screen" id="screen-historial">
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="clabel" id="hist-lbl">Historial</div><button onclick="loadFromDrive(false)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink3);padding:0 0 4px">↻</button></div><div id="gastos-lista"></div></div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="screen" id="screen-resumen"><div id="resumen-content"></div></div>
+
+  <!-- CONFIG -->
+  <div class="screen" id="screen-config">
+    <div id="drive-connected" class="card" style="display:none">
+      <div class="clabel">Google Drive</div>
+      <div class="connected-box">
+        <span style="font-size:28px">☁️</span>
+        <div><div style="font-weight:700;color:var(--olive);font-size:15px">✓ Drive conectado</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:2px" id="url-preview"></div></div>
+      </div>
+      <button class="btn-sec" onclick="desconectar()">Cambiar URL</button>
+    </div>
+    <div id="drive-form" class="card">
+      <div class="clabel">Conexión Google Drive</div>
+      <div class="info-box">Pegá la URL del <strong>Google Apps Script</strong>. Solo hay que hacerlo una vez.</div>
+      <input class="cfg-input" id="script-url" type="url" placeholder="https://script.google.com/macros/s/...">
+      <button class="btn-main casa" onclick="saveConfig()" style="margin-top:0">Guardar y conectar</button>
+    </div>
+    <div class="card">
+      <div class="clabel">Presupuestos</div>
+      <div id="presup-form"></div>
+      <button class="btn-main casa" onclick="savePresup()" style="margin-top:14px">Guardar presupuestos</button>
+    </div>
+    <div class="card">
+      <div class="clabel">Script actualizado — reemplazá el anterior</div>
+      <div class="info-box">⚠️ Para que el <strong>borrar y editar</strong> funcione en ambos lados, necesitás reemplazar el script anterior por este nuevo.</div>
+      <ol class="steps">
+        <li>Andá a <strong>script.google.com</strong> → abrí el proyecto <em>Gastos Familia</em></li>
+        <li>Seleccioná todo (Ctrl+A) y pegá el nuevo código</li>
+        <li>Guardá → <strong>"Implementar" → "Nueva implementación"</strong></li>
+        <li>Copiá la nueva URL y actualizala arriba</li>
+      </ol>
+      <div class="sect" style="margin-top:16px">Nuevo código del script</div>
+      <div class="script-box" id="script-code"></div>
+      <button class="btn-copy" onclick="copyScript()">Copiar código</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">Editar gasto</div>
+    <span class="modal-label">Categoría</span>
+    <div class="modal-cats" id="modal-cats"></div>
+    <span class="modal-label">Monto</span>
+    <div style="position:relative">
+      <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--ink3)">$</span>
+      <div class="modal-monto-display" id="modal-monto-display">0</div>
+    </div>
+    <div class="modal-numpad">
+      <div class="nk" onclick="mnp('1')">1</div><div class="nk" onclick="mnp('2')">2</div><div class="nk" onclick="mnp('3')">3</div>
+      <div class="nk" onclick="mnp('4')">4</div><div class="nk" onclick="mnp('5')">5</div><div class="nk" onclick="mnp('6')">6</div>
+      <div class="nk" onclick="mnp('7')">7</div><div class="nk" onclick="mnp('8')">8</div><div class="nk" onclick="mnp('9')">9</div>
+      <div class="nk" onclick="mnp('000')">000</div><div class="nk" onclick="mnp('0')">0</div><div class="nk del" onclick="mnd()">⌫</div>
+    </div>
+    <span class="modal-label">Descripción</span>
+    <input class="modal-desc" id="modal-desc" type="text" placeholder="¿En qué fue?">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModalDirect()">Cancelar</button>
+      <button class="btn-main casa" id="modal-save" onclick="saveEdit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="alert-banner" id="alert-banner">
+  <div class="alert-inner" id="alert-inner">
+    <span class="alert-emoji" id="alert-emoji"></span>
+    <div class="alert-text">
+      <div class="alert-title" id="alert-title"></div>
+      <div class="alert-sub" id="alert-sub"></div>
+    </div>
+    <button class="alert-close" onclick="closeAlert()">✕</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS={
+  Casa:[{n:"Arriendo",e:"🏡"},{n:"Auto",e:"🚗"},{n:"Alimentos",e:"🥦"},{n:"Farmacia",e:"💊"},{n:"Tali",e:"👶"},{n:"Perritos",e:"🐶"},{n:"Hogar",e:"🛋️"},{n:"Otros",e:"📦"}],
+  Lindo:[{n:"Alimentos",e:"🥦"},{n:"Belleza",e:"✨"},{n:"Cafecitos",e:"☕"},{n:"Salidas",e:"🎉"},{n:"Deporte",e:"🏃"},{n:"Material",e:"🛍️"},{n:"Transporte",e:"🚌"},{n:"Entretenimiento",e:"🎬"},{n:"Otros",e:"📦"}],
+  Linda:[{n:"Alimentos",e:"🥦"},{n:"Belleza",e:"✨"},{n:"Cafecitos",e:"☕"},{n:"Salidas",e:"🎉"},{n:"Deporte",e:"🏃"},{n:"Material",e:"🛍️"},{n:"Transporte",e:"🚌"},{n:"Entretenimiento",e:"🎬"},{n:"Otros",e:"📦"}],
+};
+const PDEF={
+  Casa:{general:1500000,Arriendo:600000,Auto:200000,Alimentos:200000,Farmacia:80000,Tali:100000,Perritos:80000,Hogar:150000,Otros:90000},
+  Lindo:{general:300000,Alimentos:80000,Belleza:30000,Cafecitos:20000,Salidas:40000,Deporte:30000,Material:25000,Transporte:30000,Entretenimiento:25000,Otros:20000},
+  Linda:{general:300000,Alimentos:80000,Belleza:30000,Cafecitos:20000,Salidas:40000,Deporte:30000,Material:25000,Transporte:30000,Entretenimiento:25000,Otros:20000},
+};
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const SCRIPT_CODE=`// GASTOS FAMILIA DE LA BARRA — Apps Script v2
+// Soporta registrar, editar, borrar con IDs únicos
+
+const FOLDER_NAME = "Gastos Familia De la Barra Schnitzler";
+const MESES_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (d.action==="registrar") return registrar(d);
+    if (d.action==="editar")    return editar(d);
+    if (d.action==="borrar")    return borrar(d);
+    if (d.action==="getGastos") return getGastos(d);
+    if (d.action==="setPresupuestos") return setPresup(d);
+    return resp({ok:false,error:"Acción desconocida"});
+  } catch(err){ return resp({ok:false,error:err.toString()}); }
+}
+function doGet(){ return resp({ok:true,msg:"API Gastos Familia v2 activa ✓"}); }
+
+function getFolder(){
+  const f=DriveApp.getFoldersByName(FOLDER_NAME);
+  return f.hasNext()?f.next():DriveApp.createFolder(FOLDER_NAME);
+}
+function getSheet(mes,anio){
+  const root=getFolder();
+  const nombre=MESES_ES[mes-1]+" "+anio;
+  let af=root.getFoldersByName(anio.toString());
+  let aFolder=af.hasNext()?af.next():root.createFolder(anio.toString());
+  let files=aFolder.getFilesByName(nombre);
+  if(files.hasNext()) return SpreadsheetApp.open(files.next());
+  const ss=SpreadsheetApp.create(nombre);
+  DriveApp.getFileById(ss.getId()).moveTo(aFolder);
+  initSheet(ss);
+  return ss;
+}
+function initSheet(ss){
+  ["Casa","Lindo","Linda"].forEach((p,i)=>{
+    let ws=i===0?ss.getSheets()[0]:ss.insertSheet();
+    ws.setName(p);
+    // ID en columna A (oculto), luego Fecha, Categoría, Descripción, Monto
+    ws.appendRow(["ID","Fecha","Categoría","Descripción","Monto"]);
+    ws.getRange(1,1,1,5).setFontWeight("bold").setBackground("#F5F2EC");
+    ws.hideColumns(1); // Oculta columna ID
+    ws.setColumnWidth(2,100);ws.setColumnWidth(3,130);
+    ws.setColumnWidth(4,200);ws.setColumnWidth(5,100);
+    ws.getRange("E2:E1000").setNumberFormat("$#,##0");
+  });
+  let pw=ss.insertSheet();pw.setName("Presupuestos");
+  pw.appendRow(["Persona","Categoría","Monto"]);
+  pw.getRange(1,1,1,3).setFontWeight("bold").setBackground("#F5F2EC");
+  pw.getRange("C2:C100").setNumberFormat("$#,##0");
+}
+
+function registrar(d){
+  const now=new Date();
+  const mes=d.mes||(now.getMonth()+1);
+  const anio=d.anio||now.getFullYear();
+  const ss=getSheet(mes,anio);
+  const ws=ss.getSheetByName(d.persona);
+  if(!ws) return resp({ok:false,error:"Pestaña no encontrada: "+d.persona});
+  ws.appendRow([d.id,d.fecha,d.categoria,d.descripcion||"",d.monto]);
+  return resp({ok:true,id:d.id});
+}
+
+function editar(d){
+  const now=new Date();
+  const mes=d.mes||(now.getMonth()+1);
+  const anio=d.anio||now.getFullYear();
+  const ss=getSheet(mes,anio);
+  const ws=ss.getSheetByName(d.persona);
+  if(!ws) return resp({ok:false,error:"Pestaña no encontrada"});
+  const data=ws.getDataRange().getValues();
+  for(let i=1;i<data.length;i++){
+    if(String(data[i][0])===String(d.id)){
+      ws.getRange(i+1,3).setValue(d.categoria);
+      ws.getRange(i+1,4).setValue(d.descripcion||"");
+      ws.getRange(i+1,5).setValue(d.monto);
+      return resp({ok:true});
+    }
+  }
+  return resp({ok:false,error:"Gasto no encontrado: "+d.id});
+}
+
+function borrar(d){
+  const now=new Date();
+  const mes=d.mes||(now.getMonth()+1);
+  const anio=d.anio||now.getFullYear();
+  const ss=getSheet(mes,anio);
+  const ws=ss.getSheetByName(d.persona);
+  if(!ws) return resp({ok:false,error:"Pestaña no encontrada"});
+  const data=ws.getDataRange().getValues();
+  for(let i=1;i<data.length;i++){
+    if(String(data[i][0])===String(d.id)){
+      ws.deleteRow(i+1);
+      return resp({ok:true});
+    }
+  }
+  return resp({ok:false,error:"Gasto no encontrado"});
+}
+
+function getGastos(d){
+  const now=new Date();
+  const ss=getSheet(d.mes||now.getMonth()+1,d.anio||now.getFullYear());
+  const result={};
+  ["Casa","Lindo","Linda"].forEach(p=>{
+    const ws=ss.getSheetByName(p);
+    if(!ws){result[p]=[];return;}
+    const rows=ws.getDataRange().getValues().slice(1);
+    result[p]=rows.filter(r=>r[0]).map(r=>({
+      id:r[0],fecha:r[1],categoria:r[2],descripcion:r[3],monto:r[4]
+    }));
+  });
+  return resp({ok:true,data:result});
+}
+
+function setPresup(d){
+  const now=new Date();
+  const ss=getSheet(now.getMonth()+1,now.getFullYear());
+  let ws=ss.getSheetByName("Presupuestos");
+  ws.clearContents();
+  ws.appendRow(["Persona","Categoría","Monto"]);
+  d.rows.forEach(r=>ws.appendRow(r));
+  return resp({ok:true});
+}
+
+function resp(obj){
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let per='Casa', cat=null;
+let gastos=JSON.parse(localStorage.getItem('gfdb_g')||'[]');
+let presup=JSON.parse(localStorage.getItem('gfdb_p')||JSON.stringify(PDEF));
+let sUrl=localStorage.getItem('gfdb_url')||'';
+let queue=JSON.parse(localStorage.getItem('gfdb_q')||'[]'); // operaciones offline pendientes
+
+// Modal state
+let editId=null, mCat=null, mMontoStr='';
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+function init(){
+  const now=new Date();
+  document.getElementById('mes-label').textContent=MESES[now.getMonth()]+' '+now.getFullYear();
+  document.getElementById('script-code').textContent=SCRIPT_CODE;
+  if(sUrl) document.getElementById('script-url').value=sUrl;
+  updateSyncUI();
+  buildPresupForm();
+  renderCats();
+  updatePendingBadge();
+  // Auto-load from Drive on open
+  if(sUrl) loadFromDrive(true);
+  else if(queue.length>0) setTimeout(()=>processQueue(true),1000);
+}
+
+async function loadFromDrive(silent=false){
+  if(!sUrl) return;
+  if(!silent) toast('Cargando desde Drive...');
+  setLoading(true);
+  // First flush any pending queue
+  if(queue.length>0) await processQueue(true);
+  const driveGastos=await fetchGastosDrive();
+  setLoading(false);
+  if(driveGastos===null){
+    if(!silent) toast('Sin conexión — mostrando datos locales','warn');
+    return;
+  }
+  // Merge: keep local unsynced + drive data
+  const localPending=gastos.filter(g=>!g.synced);
+  // Drive is source of truth, add local pending on top
+  gastos=[...localPending,...driveGastos.filter(dg=>!localPending.find(lp=>lp.id===dg.id))];
+  gastos.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+  saveGastos();
+  // Refresh current view
+  if(document.getElementById('screen-historial').classList.contains('active')) renderHist();
+  if(document.getElementById('screen-resumen').classList.contains('active')) renderRes();
+  if(!silent) toast('¡Datos actualizados! ✓','ok');
+}
+
+function setLoading(on){
+  // Show/hide loading indicator in sync label
+  const lbl=document.getElementById('sync-label');
+  if(on){
+    lbl.textContent='· Cargando...';
+    lbl.style.color='var(--ochre)';
+    document.getElementById('sync-dot').className='dot pending';
+  } else {
+    updateSyncUI();
+  }
+}
+
+function updateSyncUI(){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  const formEl=document.getElementById('drive-form');
+  const connEl=document.getElementById('drive-connected');
+  if(sUrl){
+    dot.className='dot';
+    lbl.textContent='· Drive conectado';
+    lbl.style.color='var(--olive)';
+    formEl.style.display='none';
+    connEl.style.display='block';
+    const short=sUrl.replace('https://script.google.com/macros/s/','').substring(0,18)+'...';
+    document.getElementById('url-preview').textContent=short;
+  } else {
+    dot.className='dot off';
+    lbl.textContent='· Sin conexión Drive';
+    lbl.style.color='var(--ink3)';
+    formEl.style.display='block';
+    connEl.style.display='none';
+  }
+}
+
+function updatePendingBadge(){
+  const badge=document.getElementById('offline-badge');
+  const count=queue.length;
+  document.getElementById('pending-count').textContent=count;
+  badge.className=count>0?'offline-badge show':'offline-badge';
+  if(count>0){
+    document.getElementById('sync-dot').className='dot pending';
+  } else if(sUrl){
+    document.getElementById('sync-dot').className='dot';
+  }
+}
+
+function desconectar(){
+  sUrl=''; localStorage.removeItem('gfdb_url');
+  document.getElementById('script-url').value='';
+  updateSyncUI(); toast('URL eliminada','warn');
+}
+
+// ══════════════════════════════════════
+// PERSONA
+// ══════════════════════════════════════
+function setPer(p,btn){
+  per=p; cat=null;
+  document.querySelectorAll('.persona-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('btn-main').className=`btn-main ${p.toLowerCase()}`;
+  document.getElementById('btn-main').disabled=true;
+  const mi=document.getElementById('monto-input');
+  if(mi) mi.className=`monto-input ${p.toLowerCase()}`;
+  renderCats();
+  if(document.getElementById('screen-historial').classList.contains('active'))renderHist();
+  if(document.getElementById('screen-resumen').classList.contains('active'))renderRes();
+}
+
+// ══════════════════════════════════════
+// CATEGORÍAS
+// ══════════════════════════════════════
+function renderCats(){
+  const cats=CATS[per],cl=per.toLowerCase();
+  const g=document.getElementById('cat-grid');
+  g.className=`cat-grid${cats.length>=9?' cols3':''}`;
+  g.innerHTML=cats.map(c=>`
+    <div class="cat-btn${cat===c.n?' selected '+cl:''}" onclick="selCat('${c.n}')">
+      <span class="ce">${c.e}</span><div class="cn">${c.n}</div>
+    </div>`).join('');
+}
+function selCat(n){cat=n;renderCats();checkBtn();}
+function emoji(p,n){return(CATS[p]||[]).find(x=>x.n===n)?.e||'💸';}
+
+function onMontoInput(el){
+  // Strip everything except digits
+  const raw=el.value.replace(/\D/g,'');
+  const num=parseInt(raw)||0;
+  // Store raw value in dataset
+  el.dataset.raw=raw;
+  // Format with thousands separator, keep cursor at end
+  el.value=num>0?num.toLocaleString('es-CL'):'';
+  checkBtn();
+}
+
+function getMontoVal(){
+  const el=document.getElementById('monto-input');
+  return parseInt(el.dataset.raw||el.value.replace(/\D/g,''))||0;
+}
+
+function checkBtn(){
+  const m=getMontoVal();
+  document.getElementById('btn-main').disabled=!(cat&&m>0);
+}
+
+// ══════════════════════════════════════
+// NUMPAD MODAL
+// ══════════════════════════════════════
+function mnp(v){
+  if(mMontoStr.length>=9) return;
+  mMontoStr+=v;
+  mMontoStr=mMontoStr.replace(/^0+(\d)/,'$1');
+  updateModalMonto();
+}
+function mnd(){mMontoStr=mMontoStr.slice(0,-1);updateModalMonto();}
+function updateModalMonto(){
+  const el=document.getElementById('modal-monto-display');
+  const m=parseInt(mMontoStr)||0;
+  el.textContent=m===0?'0':fmt(m);
+}
+
+// ══════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════
+function goScreen(name,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='historial')renderHist();
+  if(name==='resumen')renderRes();
+}
+
+// ══════════════════════════════════════
+// AGREGAR
+// ══════════════════════════════════════
+async function agregar(){
+  const m=getMontoVal();
+  const d=document.getElementById('desc-input').value.trim();
+  if(!cat) return toast('Elegí una categoría','err');
+  if(m<=0) return toast('Ingresá un monto','err');
+
+  const now=new Date();
+  const g={
+    id:'g_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+    persona:per,categoria:cat,monto:m,descripcion:d,
+    fecha:now.toLocaleDateString('es-CL'),
+    fechaISO:now.toISOString(),
+    mes:now.getMonth()+1,anio:now.getFullYear(),
+    synced:false
+  };
+
+  gastos.unshift(g);
+  saveGastos();
+
+  const cg=cat,cm=m;
+  cat=null;
+  const mi2=document.getElementById('monto-input');
+  mi2.value=''; mi2.dataset.raw=''; mi2.className='monto-input';
+  document.getElementById('desc-input').value='';
+  renderCats();
+  document.getElementById('btn-main').disabled=true;
+
+  // Intentar enviar a Drive
+  const sent=await driveOp({action:'registrar',id:g.id,persona:g.persona,categoria:g.categoria,descripcion:g.descripcion,monto:g.monto,fecha:g.fecha,mes:g.mes,anio:g.anio});
+  if(sent){
+    g.synced=true;saveGastos();
+    toast('$'+fmt(cm)+' en '+cg,'ok');
+  } else {
+    addQueue({action:'registrar',g});
+    toast('$'+fmt(cm)+' guardado (se enviará cuando haya internet)','warn');
+  }
+  updatePendingBadge();
+}
+
+
+// ══════════════════════════════════════
+// ALERTAS DE PRESUPUESTO
+// ══════════════════════════════════════
+let alertTimer=null;
+function checkBudgetAlert(persona){
+  const now=new Date();
+  const gs=gastosDelMes(persona,now.getMonth()+1,now.getFullYear());
+  const total=gs.reduce((s,g)=>s+g.monto,0);
+  const p=presup[persona]||PDEF[persona];
+  const pct=total/p.general*100;
+  const key='gfdb_alerted_'+persona+'_'+now.getMonth()+'_'+now.getFullYear();
+  const alerted=parseInt(localStorage.getItem(key)||'0');
+
+  let level=0, emoji='', title='', sub='';
+  if(pct>=100 && alerted<100){
+    level=100; emoji='🔴';
+    title='¡Presupuesto agotado!';
+    sub=persona+' llegó al 100% del presupuesto general este mes.';
+  } else if(pct>=75 && alerted<75){
+    level=75; emoji='🟠';
+    title='75% del presupuesto usado';
+    sub=persona+' usó $'+fmt(total)+' de $'+fmt(p.general)+' este mes.';
+  } else if(pct>=50 && alerted<50){
+    level=50; emoji='🟡';
+    title='50% del presupuesto usado';
+    sub=persona+' usó la mitad del presupuesto del mes.';
+  }
+
+  if(level>0){
+    localStorage.setItem(key, level);
+    showAlert(emoji, title, sub, level);
+  }
+}
+
+function showAlert(emoji, title, sub, level){
+  const banner=document.getElementById('alert-banner');
+  const inner=document.getElementById('alert-inner');
+  document.getElementById('alert-emoji').textContent=emoji;
+  document.getElementById('alert-title').textContent=title;
+  document.getElementById('alert-sub').textContent=sub;
+  inner.className='alert-inner '+(level>=100?'warn100':level>=75?'warn75':'warn50');
+  banner.classList.add('show');
+  if(alertTimer) clearTimeout(alertTimer);
+  alertTimer=setTimeout(closeAlert, 7000);
+}
+
+function closeAlert(){
+  document.getElementById('alert-banner').classList.remove('show');
+  if(alertTimer){clearTimeout(alertTimer);alertTimer=null;}
+}
+
+// ══════════════════════════════════════
+// HISTORIAL
+// ══════════════════════════════════════
+function renderHist(){
+  const cl=per.toLowerCase();
+  const now=new Date();
+  const list=gastosDelMes(per,now.getMonth()+1,now.getFullYear());
+  document.getElementById('hist-lbl').textContent='Historial · '+per;
+  const el=document.getElementById('gastos-lista');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="ee">🌱</div><p>Sin gastos este mes</p></div>`;return;}
+  el.innerHTML=list.map(g=>`
+    <div class="gi" id="gi_${g.id}">
+      <div class="gi-icon ${cl}">${emoji(g.persona,g.categoria)}</div>
+      <div class="gi-info">
+        <div class="gi-cat">${g.categoria}</div>
+        <div class="gi-desc">${g.descripcion||'—'}</div>
+        <div class="gi-fecha">${g.fecha||''}</div>
+        ${!g.synced?'<div class="gi-pending">⏳ pendiente de sync</div>':''}
+      </div>
+      <div class="gi-right">
+        <div class="gi-monto ${cl}">$${fmt(g.monto)}</div>
+        <div class="gi-actions">
+          <button class="gi-btn edit" onclick="openEdit('${g.id}')" title="Editar">✏️</button>
+          <button class="gi-btn" onclick="borrarGasto('${g.id}')" title="Borrar">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// BORRAR
+// ══════════════════════════════════════
+async function borrarGasto(id){
+  const g=gastos.find(x=>x.id===id);
+  if(!g) return;
+
+  // Animación rápida
+  const el=document.getElementById('gi_'+id);
+  if(el){el.style.opacity='0';el.style.transition='opacity .2s';setTimeout(()=>el.remove(),200);}
+
+  gastos=gastos.filter(x=>x.id!==id);
+  saveGastos();
+
+  const sent=await driveOp({action:'borrar',id,persona:g.persona,mes:g.mes,anio:g.anio});
+  if(!sent) addQueue({action:'borrar',id,persona:g.persona,mes:g.mes,anio:g.anio});
+
+  updatePendingBadge();
+  if(document.getElementById('screen-resumen').classList.contains('active'))renderRes();
+  toast('Gasto eliminado');
+}
+
+// ══════════════════════════════════════
+// EDITAR
+// ══════════════════════════════════════
+function openEdit(id){
+  const g=gastos.find(x=>x.id===id);
+  if(!g) return;
+  editId=id;
+  mCat=g.categoria;
+  mMontoStr=String(g.monto);
+
+  // Llenar modal
+  const cl=g.persona.toLowerCase();
+  document.getElementById('modal-save').className=`btn-main ${cl}`;
+  document.getElementById('modal-desc').value=g.descripcion||'';
+  updateModalMonto();
+  renderModalCats(g.persona,cl);
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function renderModalCats(persona,cl){
+  const cats=CATS[persona]||CATS.Casa;
+  document.getElementById('modal-cats').innerHTML=cats.map(c=>`
+    <div class="cat-btn${mCat===c.n?' selected '+cl:''}" onclick="mSelCat('${c.n}','${persona}','${cl}')">
+      <span class="ce" style="font-size:20px">${c.e}</span>
+      <div class="cn" style="font-size:10px">${c.n}</div>
+    </div>`).join('');
+}
+function mSelCat(n,persona,cl){
+  mCat=n;renderModalCats(persona,cl);
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modal-bg')) closeModalDirect();
+}
+function closeModalDirect(){
+  document.getElementById('modal-bg').classList.remove('open');
+  editId=null;mCat=null;mMontoStr='';
+}
+
+async function saveEdit(){
+  const m=parseInt(mMontoStr)||0;
+  const d=document.getElementById('modal-desc').value.trim();
+  if(!mCat) return toast('Elegí una categoría','err');
+  if(m<=0)  return toast('Ingresá un monto','err');
+
+  const g=gastos.find(x=>x.id===editId);
+  if(!g){closeModalDirect();return;}
+
+  g.categoria=mCat;
+  g.monto=m;
+  g.descripcion=d;
+  g.synced=false;
+  saveGastos();
+
+  closeModalDirect();
+  renderHist();
+  if(document.getElementById('screen-resumen').classList.contains('active'))renderRes();
+
+  const sent=await driveOp({action:'editar',id:g.id,persona:g.persona,categoria:g.categoria,descripcion:g.descripcion,monto:g.monto,mes:g.mes,anio:g.anio});
+  if(sent){g.synced=true;saveGastos();toast('Gasto actualizado','ok');}
+  else{addQueue({action:'editar',g});toast('Guardado (se sincronizará después)','warn');}
+  updatePendingBadge();
+}
+
+// ══════════════════════════════════════
+// RESUMEN
+// ══════════════════════════════════════
+function renderRes(){
+  const cl=per.toLowerCase();
+  const p=presup[per]||PDEF[per];
+  const now=new Date();
+  const gs=gastosDelMes(per,now.getMonth()+1,now.getFullYear());
+  const total=gs.reduce((s,g)=>s+g.monto,0);
+  const disp=p.general-total;
+  const pct=Math.min(total/p.general*100,100);
+  const ac=cl==='casa'?'var(--terra)':cl==='lindo'?'var(--sea)':'var(--olive)';
+  const bc=pct>90?'var(--terra)':pct>70?'var(--ochre)':ac;
+
+  let html=`<div class="hero">
+    <div class="hlabel">Gastado este mes</div>
+    <div class="hamount ${cl}">$${fmt(total)}</div>
+    <div class="hsub">de <span>$${fmt(p.general)}</span> · disponible <span style="color:${disp<0?'var(--terra)':'inherit'}">$${fmt(Math.abs(disp))}</span>${disp<0?' 🔴':''}</div>
+    <div class="bar-wrap">
+      <div class="bar-hd"><span style="font-size:12px;color:var(--ink3)">Uso del presupuesto</span><span style="font-size:14px;font-weight:700;color:${bc}">${pct.toFixed(0)}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${bc}"></div></div>
+    </div>
+  </div><div class="sect">Por categoría</div>`;
+
+  CATS[per].forEach(c=>{
+    const gast=gs.filter(g=>g.categoria===c.n).reduce((s,g)=>s+g.monto,0);
+    const pC=p[c.n]||0,pctC=pC>0?Math.min(gast/pC*100,100):0;
+    const bcc=pctC>90?'var(--terra)':pctC>70?'var(--ochre)':ac;
+    html+=`<div class="cat-ri">
+      <div class="cri-top"><span class="cri-name">${c.e} ${c.n}</span><span class="cri-amt"><strong>$${fmt(gast)}</strong> / $${fmt(pC)}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pctC}%;background:${bcc}"></div></div>
+    </div>`;
+  });
+  document.getElementById('resumen-content').innerHTML=html;
+}
+
+// ══════════════════════════════════════
+// DRIVE — operación genérica
+// ══════════════════════════════════════
+async function driveOp(payload){
+  if(!sUrl) return false;
+  try{
+    const r=await fetch(sUrl,{method:'POST',body:JSON.stringify(payload)});
+    const d=await r.json();
+    return d.ok!==false;
+  }catch(e){
+    // fallback no-cors (CORS might block read but write still works)
+    try{
+      await fetch(sUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      return true;
+    }catch(e2){return false;}
+  }
+}
+
+// Fetch gastos from Drive — returns array or null on fail
+async function fetchGastosDrive(){
+  if(!sUrl) return null;
+  try{
+    const now=new Date();
+    const r=await fetch(sUrl,{method:'POST',body:JSON.stringify({
+      action:'getGastos',mes:now.getMonth()+1,anio:now.getFullYear()
+    })});
+    const d=await r.json();
+    if(!d.ok||!d.data) return null;
+    // Convert Drive format to app format
+    const result=[];
+    ['Casa','Lindo','Linda'].forEach(persona=>{
+      const rows=d.data[persona]||[];
+      rows.forEach(row=>{
+        if(!row.id) return;
+        result.push({
+          id:String(row.id),
+          persona,
+          categoria:row.categoria||'',
+          descripcion:row.descripcion||'',
+          monto:parseFloat(row.monto)||0,
+          fecha:row.fecha||'',
+          fechaISO:row.fecha||'',
+          mes:now.getMonth()+1,
+          anio:now.getFullYear(),
+          synced:true
+        });
+      });
+    });
+    // Sort newest first (by id which starts with timestamp)
+    result.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+    return result;
+  }catch(e){
+    return null;
+  }
+}
+
+// Cola offline
+function addQueue(op){
+  queue.push(op);
+  localStorage.setItem('gfdb_q',JSON.stringify(queue));
+}
+
+async function processQueue(silent=false){
+  if(!sUrl||queue.length===0){if(!silent)toast('Sin pendientes ✓','ok');return;}
+  if(!silent) toast('Sincronizando '+queue.length+' operaciones...');
+  const failed=[];
+  for(const op of queue){
+    let payload;
+    if(op.action==='registrar') payload={action:'registrar',id:op.g.id,persona:op.g.persona,categoria:op.g.categoria,descripcion:op.g.descripcion,monto:op.g.monto,fecha:op.g.fecha,mes:op.g.mes,anio:op.g.anio};
+    else if(op.action==='editar') payload={action:'editar',id:op.g.id,persona:op.g.persona,categoria:op.g.categoria,descripcion:op.g.descripcion,monto:op.g.monto,mes:op.g.mes,anio:op.g.anio};
+    else if(op.action==='borrar') payload={action:'borrar',id:op.id,persona:op.persona,mes:op.mes,anio:op.anio};
+    const ok=await driveOp(payload);
+    if(ok){
+      // Marcar como synced en gastos
+      if(op.action==='registrar'||op.action==='editar'){
+        const g=gastos.find(x=>x.id===op.g.id);
+        if(g){g.synced=true;}
+      }
+    } else { failed.push(op); }
+  }
+  queue=failed;
+  localStorage.setItem('gfdb_q',JSON.stringify(queue));
+  saveGastos();
+  updatePendingBadge();
+  if(!silent) toast(failed.length===0?'¡Todo sincronizado! ✓':failed.length+' operaciones fallaron','ok');
+}
+
+async function syncAll(){ await loadFromDrive(false); }
+
+// ══════════════════════════════════════
+// PRESUPUESTOS
+// ══════════════════════════════════════
+function buildPresupForm(){
+  let html='';
+  ['Casa','Lindo','Linda'].forEach(p=>{
+    const cl=p.toLowerCase();
+    const ac=cl==='casa'?'var(--terra)':cl==='lindo'?'var(--sea)':'var(--olive)';
+    const pp=presup[p]||PDEF[p];
+    html+=`<div style="margin-bottom:24px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${ac};margin-bottom:12px">${p}</div>
+      <div class="presup-row">
+        <label class="bold">General</label>
+        <div class="presup-input-wrap">
+          <span>$</span>
+          <input type="number" inputmode="numeric" class="presup-input" id="pp_${p}_general" value="${pp.general}"
+            oninput="onPresupInput('${p}')" style="border-color:${ac}">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);text-align:right;margin:-6px 0 10px;padding-right:4px" id="pp_${p}_general_fmt">
+        $${fmt(pp.general)}
+      </div>`;
+
+    CATS[p].forEach(c=>{
+      html+=`<div class="presup-row">
+        <label>${c.e} ${c.n}</label>
+        <div class="presup-input-wrap">
+          <span>$</span>
+          <input type="number" inputmode="numeric" class="presup-input" id="pp_${p}_${c.n}" value="${pp[c.n]||0}"
+            oninput="onPresupInput('${p}')">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);text-align:right;margin:-6px 0 8px;padding-right:4px" id="pp_${p}_${c.n}_fmt">
+        $${fmt(pp[c.n]||0)}
+      </div>`;
+    });
+
+    // Sum row
+    const catSum=CATS[p].reduce((s,c)=>s+(pp[c.n]||0),0);
+    const diff=pp.general-catSum;
+    const isOk=diff>=0;
+    html+=`<div class="presup-sum-row ${isOk?'ok':'over'}" id="pp_${p}_sum">
+      <span class="presup-sum-label">${isOk?'✓ Suma categorías':'⚠️ Suma categorías'}</span>
+      <div style="text-align:right">
+        <div class="presup-sum-val" style="color:${isOk?'var(--olive)':'var(--terra)'}">
+          $${fmt(catSum)} <span style="font-size:14px;font-family:'Jost',sans-serif;font-weight:500"> / $${fmt(pp.general)}</span>
+        </div>
+        <div style="font-size:11px;color:${isOk?'var(--olive)':'var(--terra)'};margin-top:2px">
+          ${isOk?'Quedan $'+fmt(diff)+' sin asignar':'Excede por $'+fmt(Math.abs(diff))}
+        </div>
+      </div>
+    </div>`;
+
+    html+='</div>';
+  });
+  document.getElementById('presup-form').innerHTML=html;
+}
+
+function onPresupInput(p){
+  const pp=presup[p]||PDEF[p];
+  // Update formatted hint for general
+  const gVal=getNum('pp_'+p+'_general');
+  const fmtEl=document.getElementById('pp_'+p+'_general_fmt');
+  if(fmtEl) fmtEl.textContent='$'+fmt(gVal);
+
+  // Update formatted hints for cats
+  let catSum=0;
+  CATS[p].forEach(c=>{
+    const v=getNum('pp_'+p+'_'+c.n);
+    catSum+=v;
+    const el=document.getElementById('pp_'+p+'_'+c.n+'_fmt');
+    if(el) el.textContent='$'+fmt(v);
+  });
+
+  // Update sum row
+  const diff=gVal-catSum;
+  const isOk=diff>=0;
+  const sumEl=document.getElementById('pp_'+p+'_sum');
+  if(sumEl){
+    sumEl.className='presup-sum-row '+(isOk?'ok':'over');
+    sumEl.innerHTML=`
+      <span class="presup-sum-label">${isOk?'✓ Suma categorías':'⚠️ Suma categorías'}</span>
+      <div style="text-align:right">
+        <div class="presup-sum-val" style="color:${isOk?'var(--olive)':'var(--terra)'}">
+          $${fmt(catSum)} <span style="font-size:14px;font-family:'Jost',sans-serif;font-weight:500"> / $${fmt(gVal)}</span>
+        </div>
+        <div style="font-size:11px;color:${isOk?'var(--olive)':'var(--terra)'};margin-top:2px">
+          ${isOk?'Quedan $'+fmt(diff)+' sin asignar':'Excede por $'+fmt(Math.abs(diff))}
+        </div>
+      </div>`;
+  }
+}
+
+function savePresup(){
+  const np={};
+  ['Casa','Lindo','Linda'].forEach(p=>{
+    np[p]={general:getNum('pp_'+p+'_general')};
+    CATS[p].forEach(c=>{np[p][c.n]=getNum('pp_'+p+'_'+c.n);});
+  });
+  presup=np;
+  localStorage.setItem('gfdb_p',JSON.stringify(presup));
+  toast('Presupuestos guardados','ok');
+  if(sUrl){
+    const rows=[];
+    ['Casa','Lindo','Linda'].forEach(p=>{rows.push([p,'general',presup[p].general]);CATS[p].forEach(c=>rows.push([p,c.n,presup[p][c.n]||0]));});
+    driveOp({action:'setPresupuestos',rows});
+  }
+}
+function getNum(id){return parseFloat(document.getElementById(id)?.value||0)||0;}
+
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+function saveConfig(){
+  const url=document.getElementById('script-url').value.trim();
+  if(!url||!url.includes('script.google.com')) return toast('URL inválida','err');
+  sUrl=url; localStorage.setItem('gfdb_url',sUrl);
+  updateSyncUI(); toast('¡Drive conectado!','ok');
+  if(queue.length>0) setTimeout(()=>processQueue(true),500);
+}
+
+// ══════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════
+function exportCSV(){
+  if(!gastos.length) return toast('Sin gastos para exportar','err');
+  let csv='Persona,Fecha,Categoría,Descripción,Monto\n';
+  [...gastos].reverse().forEach(g=>{
+    csv+=`${g.persona},${g.fecha||''},${g.categoria},"${g.descripcion||''}",${g.monto}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`gastos_${new Date().toLocaleDateString('es-CL').replace(/\//g,'-')}.csv`;
+  a.click(); toast('CSV descargado','ok');
+}
+
+function copyScript(){navigator.clipboard.writeText(SCRIPT_CODE).then(()=>toast('Código copiado','ok'));}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function gastosDelMes(p,mes,anio){
+  return gastos.filter(g=>g.persona===p&&g.mes===mes&&g.anio===anio);
+}
+function saveGastos(){localStorage.setItem('gfdb_g',JSON.stringify(gastos));}
+function fmt(n){return Math.abs(Math.round(n)).toLocaleString('es-CL');}
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast${type?' '+type:''} show`;
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>
